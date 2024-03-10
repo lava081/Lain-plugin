@@ -79,7 +79,6 @@ export class admin extends plugin {
       {
         regex: /#(Lain|铃音)设置PC微信名称/i,
         action: (msg) => {
-          msg = msg === '开启'
           this.yamlData('Config-other', 'ComWeChat.name', msg)
         }
       },
