@@ -624,12 +624,12 @@ class LagrangeCore {
       member.getAvatarUrl = (size = 0) => `https://q1.qlogo.cn/g?b=qq&s=${size}&nk=${user_id}`
       return member
     } else {
-      api.get_group_member_info(this.id, group_id, user_id, true).then(res => {
+      return new Promise((resolve, reject) => api.get_group_member_info(this.id, group_id, user_id, true).then(res => {
         if (typeof cb === 'function') {
           cb(res)
         }
-      })
-      return {}
+        resolve(res)
+      }).catch(reject))
     }
   }
 
@@ -1187,11 +1187,16 @@ class LagrangeCore {
  * @param {boolean} quote - 是否引用回复
  */
   async sendReplyMsg (e, id, msg, quote) {
-    let { message, raw_message, content, node } = await this.getLagrangeCore(msg)
+    let { message, raw_message, content, node } = await this.getLagrangeCore(msg, true, e.group_id)
 
     if (quote && !content) {
       message.unshift({ type: 'reply', data: { id: String(e.message_id) } })
       raw_message = '[回复]' + raw_message
+    }
+
+    /** 允许自行修改消息内容 */
+    if (content && Bot.processContent) {
+      ({ content, message } = await Bot.processContent(content, message, e))
     }
 
     if (content) content = await this.sendMarkdown(content, msg, e)
@@ -1217,7 +1222,7 @@ class LagrangeCore {
    * @param {string|object|array} msg - 消息内容
    */
   async sendGroupMsg (group_id, msg) {
-    let { message, raw_message, content, node } = await this.getLagrangeCore(msg)
+    let { message, raw_message, content, node } = await this.getLagrangeCore(msg, true, group_id)
     if (content) content = await this.sendMarkdown(content, msg)
     return await api.send_group_msg(this.id, group_id, message, raw_message, node, content)
   }
@@ -1318,7 +1323,7 @@ class LagrangeCore {
    * 转换message为LagrangeCore格式
    * @param {string|Array|object} data - 消息内容
    */
-  async getLagrangeCore (data, Markdown = true) {
+  async getLagrangeCore (data, Markdown = true, group_id) {
     let node = data?.test || false
     /** 标准化消息内容 */
     data = common.array(data)
@@ -1333,7 +1338,7 @@ class LagrangeCore {
     }
 
     /** 转为全局Markdown */
-    if (Markdown) return await this.Markdown(data)
+    if (Markdown) return await this.Markdown(data, group_id)
 
     /** 转为LagrangeCore标准 message */
     for (let i of data) {
@@ -1501,7 +1506,7 @@ class LagrangeCore {
   }
 
   /** 转为全局Markdown */
-  async Markdown (data) {
+  async Markdown (data, group_id) {
     if (!data) {
       return {}
     }
@@ -1518,8 +1523,16 @@ class LagrangeCore {
           if (i.qq === 'all') {
             content += '[@全体成员](mqqapi://markdown/mention?at_type=everyone)'
           } else {
-            i.name = i.name || i.qq
+            if (group_id) {
+              let groupMemberList
+              await this.pickMember(group_id, i.qq, true, (res) => { groupMemberList = res })
+              i.name = groupMemberList?.card || groupMemberList?.nickname || i.name || i.qq
+            } else {
+              i.name = i.name || i.qq
+            }
+
             content += `[@${i.name}](mqqapi://markdown/mention?at_type=1&at_tinyid=${i.qq})`
+            message.push({ type: 'at', data: { qq: String(i.qq) } })
             raw_message.push(`<@${i.qq}>`)
           }
           break
