@@ -1493,7 +1493,10 @@ class Shamrock {
           raw_message.push(`<${faceMap[Number(i.id)]}>`)
           break
         case 'text':
-          content += i.text
+          // 使用正则表达式替换链接
+          content += i.text.replace(/https?:\/\/[^\s]+?(?=[\s\u4e00-\u9fa5]|$)/g, function (match) {
+            return '[🔗' + match + '](' + match + ')'
+          })
           raw_message.push(i.text)
           break
         case 'file':
