@@ -746,7 +746,7 @@ class LagrangeCore {
     if (msg.length) {
       for (let i of msg) {
         try {
-          const { message: content } = await this.getLagrangeCore(i)
+          const { message: content } = await this.getLagrangeCore(i, false)
           // const id = await this.sendApi('send_forward_msg', { messages: [{ type: 'node', data: { name: this.nickname || 'LagrangeCore', uin: String(this.id), content } }] })
           makeForwardMsg.message.push({ type: 'node', data: { type: 'node', data: { name: this.nickname || 'LagrangeCore', uin: String(this.id), content } } })
         } catch (err) {
@@ -1189,7 +1189,7 @@ class LagrangeCore {
   async sendReplyMsg (e, id, msg, quote) {
     let { message, raw_message, content, node } = await this.getLagrangeCore(msg, true, e.group_id)
 
-    if (quote && !content) {
+    if (quote && !content && !node) {
       message.unshift({ type: 'reply', data: { id: String(e.message_id) } })
       raw_message = '[回复]' + raw_message
     }
@@ -1232,20 +1232,20 @@ class LagrangeCore {
     /** 随机生成1-10000 */
     const group_id = Math.floor(Math.random() * 10000) + 10000
     let messages =
-      {
-        type: 'node',
-        data: {
-          name: '小助手',
-          uin: '2854196310',
-          content: [
-            {
-              type: 'markdown',
-              // 迷惑？？
-              data: { content: JSON.stringify({ content }) }
-            }
-          ]
-        }
+    {
+      type: 'node',
+      data: {
+        name: '小助手',
+        uin: '2854196310',
+        content: [
+          {
+            type: 'markdown',
+            // 迷惑？？
+            data: { content: JSON.stringify({ content }) }
+          }
+        ]
       }
+    }
 
     let buttonData = {
       rows: []
@@ -1650,7 +1650,7 @@ class LagrangeCore {
         case 'node':
           node = true
           message.push({ type: 'node', data: { ...i.data } })
-          raw_message.push(`<转发消息:${i.data.id}>`)
+          raw_message.push('<转发消息: message...>')
           break
         default:
           // 为了兼容更多字段，不再进行序列化，风险是有可能未知字段导致LagrangeCore崩溃

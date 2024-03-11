@@ -8,7 +8,6 @@ import { faceMap, pokeMap } from '../../model/shamrock/face.js'
 import Button from '../QQBot/plugins.js'
 import sizeOf from 'image-size'
 
-
 class Shamrock {
   constructor (bot, request) {
     /** 存一下 */
@@ -1488,7 +1487,17 @@ class Shamrock {
           if (i.qq === 'all') {
             content += '[@全体成员](mqqapi://markdown/mention?at_type=everyone)'
           } else {
-            i.name = i.name || i.qq
+            if (!i.name) {
+              // 先尝试从redis拿缓存名称，不存在从陌生人接口拿缓存
+              let name = await redis.get(`lain:shamrock:at${i.qq}`)
+              if (!name) {
+                name = await api.get_stranger_info(this.id, i.qq)
+                name = name.nickname || name.card || i.qq
+                // 保存redis，过期时间7天
+                redis.set(`lain:shamrock:at${i.qq}`, name, { EX: 60 * 60 * 24 * 7 })
+                i.name = name
+              }
+            }
             content += `[@${i.name}](mqqapi://markdown/mention?at_type=1&at_tinyid=${i.qq})`
             raw_message.push(`<@${i.qq}>`)
           }

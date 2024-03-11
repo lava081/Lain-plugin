@@ -900,7 +900,7 @@ export default class adapterQQBot {
     return res
   }
 
-  /** 转换文本中的URL为图片 */
+  /** 转换文本中的URL为按钮 */
   HandleURL (msg) {
     const message = []
     if (msg?.text) msg = msg.text
