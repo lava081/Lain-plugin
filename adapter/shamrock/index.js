@@ -1195,6 +1195,11 @@ class Shamrock {
       raw_message = '[回复]' + raw_message
     }
 
+    /** 允许自行修改消息内容 */
+    if (content && Bot.processContent) {
+      ({ content, message } = await Bot.processContent(content, message, e))
+    }
+
     if (content) content = await this.sendMarkdown(content, msg, e)
 
     if (e.isGroup) return await api.send_group_msg(this.id, id, message, raw_message, node, content)
