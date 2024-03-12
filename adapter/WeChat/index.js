@@ -258,6 +258,7 @@ class AdapterComWeChat {
     }
 
     data = {
+      uin: this.id, // ???鬼知道哪来的这玩意，icqq都没有...
       ...data,
       self_id: this.id,
       message,

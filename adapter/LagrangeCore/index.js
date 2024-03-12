@@ -778,6 +778,7 @@ class LagrangeCore {
       const { message, ToString, raw_message, log_message, source, file } = await this.getMessage(data.message, group_id)
 
       /** 通用数据 */
+      e.uin = this.id // ???鬼知道哪来的这玩意，icqq都没有...
       e.message = message
       e.raw_message = raw_message
       e.log_message = log_message

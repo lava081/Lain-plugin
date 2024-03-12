@@ -96,6 +96,7 @@ export default class adapterQQGuild {
     const group_name = await this.getGroupName(src_guild_id || guild_id, channel_id, friend)
 
     data.data = e
+    data.uin = this.id // ???鬼知道哪来的这玩意，icqq都没有...
     data.adapter = 'QQGuild'
     data.user_id = user_id
     data.group_id = group_id

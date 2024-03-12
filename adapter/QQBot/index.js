@@ -183,6 +183,7 @@ export default class adapterQQBot {
   async message (data, isGroup) {
     let { self_id: tinyId, ...e } = data
     e.data = data
+    e.uin = this.id // ???鬼知道哪来的这玩意，icqq都没有...
     e.tiny_id = tinyId
     e.self_id = this.id
     e.sendMsg = data.reply

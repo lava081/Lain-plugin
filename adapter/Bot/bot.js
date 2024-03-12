@@ -98,7 +98,7 @@ Bot.Stream = async function (file, data) {
   return new Promise((resolve, reject) => {
     const chunks = []
     file.on('data', (chunk) => chunks.push(chunk))
-    file.on('end', () => data?.base ? resolve(Buffer.concat(chunks).toString('base64')) : resolve(Buffer.concat(chunks)))
+    file.on('end', () => data?.base ? resolve('base64://' + Buffer.concat(chunks).toString('base64')) : resolve(Buffer.concat(chunks)))
     file.on('error', (err) => reject(err))
   })
 }
@@ -449,10 +449,8 @@ Bot.Button = function (list, line = 3) {
         }
       }
       if (i.QQBot) {
-        if (i.QQBot.render_data)
-          Object.assign(Button.render_data, i.QQBot.render_data)
-        if (i.QQBot.action)
-          Object.assign(Button.action, i.QQBot.action)
+        if (i.QQBot.render_data) Object.assign(Button.render_data, i.QQBot.render_data)
+        if (i.QQBot.action) Object.assign(Button.action, i.QQBot.action)
       }
       arr.push(Button)
       if (index % line == 0 || index == list.length) {
