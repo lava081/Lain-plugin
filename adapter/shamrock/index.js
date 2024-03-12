@@ -743,20 +743,11 @@ class Shamrock {
 
     if (msg.length) {
       for (let i of msg) {
-        let { message } = await this.getShamrock(i)
+        let { message, raw_message } = await this.getShamrock(i, false)
 
         try {
-          const res = await api.upload_multi_message(this.id, [
-            {
-              type: 'node',
-              data: {
-                content: message
-              }
-            }
-          ])
-          res.id = res.res_id
-          delete res.res_id
-          makeForwardMsg.message.push({ type: 'forward', data: res })
+          const { message_id } = await api.send_private_msg(this.id, this.id, message, raw_message)
+          makeForwardMsg.message.push({ type: 'node', data: { id: message_id } })
         } catch (err) {
           common.error(this.id, err)
         }
@@ -1458,8 +1449,8 @@ class Shamrock {
           }
           break
         case 'forward':
-          message.push(i)
-          raw_message.push(i.desc)
+          message.push({ type: 'text', data: { text: i.text } })
+          raw_message.push(i.text)
           break
         case 'node':
           node = true
