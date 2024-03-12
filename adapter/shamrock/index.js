@@ -743,11 +743,20 @@ class Shamrock {
 
     if (msg.length) {
       for (let i of msg) {
-        let { message, raw_message } = await this.getShamrock(i, false)
+        let { message } = await this.getShamrock(i)
 
         try {
-          const { message_id } = await api.send_private_msg(this.id, this.id, message, raw_message)
-          makeForwardMsg.message.push({ type: 'node', data: { id: message_id } })
+          const res = await api.upload_multi_message(this.id, [
+            {
+              type: 'node',
+              data: {
+                content: message
+              }
+            }
+          ])
+          res.id = res.res_id
+          delete res.res_id
+          makeForwardMsg.message.push({ type: 'forward', data: res })
         } catch (err) {
           common.error(this.id, err)
         }
@@ -778,6 +787,7 @@ class Shamrock {
       const { message, ToString, raw_message, log_message, source, file } = await this.getMessage(data.message, group_id)
 
       /** 通用数据 */
+      e.uin = this.id // ???鬼知道哪来的这玩意，icqq都没有...
       e.message = message
       e.raw_message = raw_message
       e.log_message = log_message
@@ -1448,8 +1458,8 @@ class Shamrock {
           }
           break
         case 'forward':
-          message.push({ type: 'text', data: { text: i.text } })
-          raw_message.push(i.text)
+          message.push(i)
+          raw_message.push(i.desc)
           break
         case 'node':
           node = true
