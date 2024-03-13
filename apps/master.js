@@ -48,7 +48,7 @@ export class LainMaster extends plugin {
     /** 生成验证码 */
     sign[e.user_id] = { user_id, sign: crypto.randomUUID() }
     logger.mark(`设置主人验证码：${logger.green(sign[e.user_id].sign)}`)
-    await e.reply([segment.at(e.user_id), '请输入控制台的验证码'])
+    await e.reply([segment.at(e.user_id), '请输入控制台的验证码', ...Bot.Button([{ label: '验证身份', data: sign[e.user_id].sign, reply: true, admin: true }])])
     /** 开始上下文 */
     return await this.setContext('SetAdmin')
   }
