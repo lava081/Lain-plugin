@@ -741,19 +741,21 @@ class Shamrock {
       }
     }
 
-    if (msg.length) {
-      for (let i of msg) {
-        let { message, raw_message } = await this.getShamrock(i, false)
-
-        try {
-          const { message_id } = await api.send_private_msg(this.id, this.id, message, raw_message)
-          makeForwardMsg.message.push({ type: 'node', data: { id: message_id } })
-        } catch (err) {
-          common.error(this.id, err)
+    const content = (await Promise.all(msg.map(async i => {
+      try {
+        let shamrock = (await this.getShamrock(i)).message[0]
+        return {
+          type: 'node',
+          data: {
+            content: shamrock
+          }
         }
+      } catch (err) {
+        logger.warn('制作转发消息节点失败：', err)
+        return null
       }
-    }
-    return makeForwardMsg
+    }))).filter(i => i)
+    return content
   }
 
   /** 撤回消息 */
