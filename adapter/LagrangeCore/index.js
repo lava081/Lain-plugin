@@ -150,7 +150,7 @@ class LagrangeCore {
         data.user_id = data.target_id
         if (this.id === data.user_id) {
           let gml = await Bot[this.id].gml.get(data.group_id)
-          gml[this.id] = { ...gml[this.id] }
+          gml[this.id] = { ...gml.get(this.id) }
           if (data.set) {
             gml[this.id].role = 'admin'
             common.info(this.id, `机器人[${this.id}]在群[${data.group_id}]被设置为管理员`)
@@ -161,7 +161,7 @@ class LagrangeCore {
           Bot[this.id].gml.set(data.group_id, { ...gml })
         } else {
           let gml = await Bot[this.id].gml.get(data.group_id)
-          gml[data.target_id] = { ...gml[data.target_id] }
+          gml[data.target_id] = { ...gml.get(data.target_id) }
           if (data.set) {
             gml[data.target_id].role = 'admin'
             common.info(this.id, `成员[${data.target_id}]在群[${data.group_id}]被设置为管理员`)
@@ -205,7 +205,7 @@ class LagrangeCore {
           case 'title': {
             common.info(this.id, `群[${data.group_id}]成员[${data.user_id}]获得头衔[${data.title}]`)
             let gml = Bot[this.id].gml.get(data.group_id)
-            let user = gml[data.user_id]
+            let user = gml.get(data.user_id)
             user.title = data.title
             gml[data.user_id] = user
             Bot[this.id].gml.set(data.group_id, gml)
@@ -228,7 +228,7 @@ class LagrangeCore {
       case 'group_card': {
         common.info(this.id, `群[${data.group_id}]成员[${data.user_id}]群名片变成为${data.card_new}`)
         let gml = Bot[this.id].gml.get(data.group_id)
-        let user = gml[data.user_id]
+        let user = gml.get(data.user_id)
         user.card = data.card_new
         gml[data.user_id] = user
         Bot[this.id].gml.set(data.group_id, gml)
@@ -514,8 +514,8 @@ class LagrangeCore {
   /** 群对象 */
   pickGroup (group_id) {
     const name = Bot[this.id].gl.get(group_id)?.group_name || group_id
-    const is_admin = Bot[this.id].gml.get(group_id)?.[this.id]?.role === 'admin'
-    const is_owner = Bot[this.id].gml.get(group_id)?.[this.id]?.role === 'owner'
+    const is_admin = Bot[this.id].gml.get(group_id)?.get(this.id)?.role === 'admin'
+    const is_owner = Bot[this.id].gml.get(group_id)?.get(this.id)?.role === 'owner'
     return {
       name,
       is_admin: is_owner || is_admin,
@@ -539,7 +539,7 @@ class LagrangeCore {
       /** 设置管理 */
       setAdmin: async (qq, type) => await api.set_group_admin(this.id, group_id, qq, type),
       /** 踢 */
-      kickMember: async (qq, reject_add_request = false) => await api.set_group_kick(this.id, group_id, qq, reject_add_request),
+      kickMember: async (qq, reject_add_request = false) => { await api.set_group_kick(this.id, group_id, qq, reject_add_request); return true },
       /** 头衔 **/
       setTitle: async (qq, title, duration) => await api.set_group_special_title(this.id, group_id, qq, title),
       /** 修改群名片 **/
@@ -619,7 +619,7 @@ class LagrangeCore {
   pickMember (group_id, user_id, refresh = false, cb = () => { }) {
     if (!refresh) {
       /** 取缓存！！！别问为什么，因为傻鸟同步 */
-      let member = Bot[this.id].gml.get(group_id)?.[user_id] || {}
+      let member = Bot[this.id].gml.get(group_id)?.get(user_id) || {}
       member.info = { ...member }
       member.getAvatarUrl = (size = 0) => `https://q1.qlogo.cn/g?b=qq&s=${size}&nk=${user_id}`
       return member
@@ -937,7 +937,7 @@ class LagrangeCore {
           try {
             let qq = i.data.qq
             ToString.push(`{at:${qq}}`)
-            let groupMemberList = Bot[this.id].gml.get(group_id)?.[qq]
+            let groupMemberList = Bot[this.id].gml.get(group_id)?.get(qq)
             let at = groupMemberList?.nickname || groupMemberList?.card || qq
             raw_message.push(`@${at}`)
             log_message.push(at == qq ? `@${qq}` : `<@${at}:${qq}>`)
