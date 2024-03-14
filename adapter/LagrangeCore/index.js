@@ -540,7 +540,7 @@ class LagrangeCore {
       /** 踢 */
       kickMember: async (qq, reject_add_request = false) => { await api.set_group_kick(this.id, group_id, qq, reject_add_request); return true },
       /** 头衔 **/
-      setTitle: async (qq, title, duration) => await api.set_group_special_title(this.id, group_id, qq, title),
+      setTitle: async (qq, title, duration) => { await api.set_group_special_title(this.id, group_id, qq, title); return true },
       /** 修改群名片 **/
       setCard: async (qq, card) => await api.set_group_card(this.id, group_id, qq, card),
       pickMember: (id) => this.pickMember(group_id, id),
