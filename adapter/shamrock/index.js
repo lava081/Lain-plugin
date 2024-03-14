@@ -743,7 +743,7 @@ class Shamrock {
 
     const content = (await Promise.all(msg.map(async i => {
       try {
-        let shamrock = (await this.getShamrock(i)).message[0]
+        let shamrock = (await this.getShamrock(i, false)).message[0]
         return {
           type: 'node',
           data: {
