@@ -1368,7 +1368,7 @@ class Shamrock {
     raw_message = raw_message.join('')
 
     /** 合并转发 */
-    if (node) raw_message = `[转发消息:${JSON.stringify(message)}]`
+    if (node) raw_message = `[转发消息:${common.limitString(JSON.stringify(message), 100)}]`
 
     return { message, raw_message, node }
   }
