@@ -1242,7 +1242,7 @@ class LagrangeCore {
           raw_message.push(`<@${i.qq}>`)
           break
         case 'face':
-          message.push({ type: 'face', data: { id: Number(i.id) } })
+          message.push({ type: 'face', data: { id: i.id + '' } })
           raw_message.push(`<${faceMap[Number(i.id)]}>`)
           break
         case 'text':
