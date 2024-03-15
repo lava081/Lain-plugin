@@ -1512,7 +1512,7 @@ class Shamrock {
         case 'text':
           // 使用正则表达式替换链接
           content += i.text.replace(/https?:\/\/[^\s]+?(?=[\s\u4e00-\u9fa5]|$)/g, function (match) {
-            return '[🔗' + match + '](' + match + ')'
+            return '[🔗`' + match + '`](' + match + ')'
           })
           raw_message.push(i.text)
           break

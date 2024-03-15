@@ -1544,7 +1544,7 @@ class LagrangeCore {
         case 'text':
           // 使用正则表达式替换链接
           content += i.text.replace(/https?:\/\/[^\s]+?(?=[\s\u4e00-\u9fa5]|$)/g, function (match) {
-            return '[🔗' + match + '](' + match + ')'
+            return '[🔗`' + match + '`](' + match + ')'
           })
           // if (i.text && typeof i.text !== 'number' && !i.text.trim()) break
           message.push({ type: 'text', data: { text: i.text } })
