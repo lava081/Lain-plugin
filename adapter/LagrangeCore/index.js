@@ -1532,7 +1532,7 @@ class LagrangeCore {
               i.name = i.name || i.qq
             }
 
-            content += `[@${i.name}](mqqapi://markdown/mention?at_type=1&at_tinyid=${i.qq})`
+            content += `[@${i.name}](mqqapi://card/show_pslcard?src_type=internal&version=1&uin=${i.qq})`
             message.push({ type: 'at', data: { qq: String(i.qq) } })
             raw_message.push(`<@${i.qq}>`)
           }
