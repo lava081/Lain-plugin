@@ -1524,12 +1524,12 @@ class LagrangeCore {
           if (i.qq === 'all') {
             content += '[@全体成员](mqqapi://markdown/mention?at_type=everyone)'
           } else {
-            if (group_id) {
+            if (group_id && i.text === undefined) {
               let groupMemberList
               await this.pickMember(group_id, i.qq, true, (res) => { groupMemberList = res })
-              i.text = i.text || groupMemberList?.card || groupMemberList?.nickname || i.qq
+              i.text = groupMemberList?.card || groupMemberList?.nickname || i.qq
             } else {
-              i.text = i.text || i.qq
+              i.text = i.text !== undefined ? i.text : i.qq
             }
 
             content += `[\`@${i.text}\`](mqqapi://card/show_pslcard?src_type=internal&version=1&uin=${i.qq})`
