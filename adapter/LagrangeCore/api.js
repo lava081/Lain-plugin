@@ -54,8 +54,8 @@ let api = {
   * @param {string} id - 机器人QQ 通过e.bot、Bot调用无需传入
   * @param {string} user_id - 陌生人QQ
   */
-  async get_stranger_info (id, user_id) {
-    const params = { user_id }
+  async get_stranger_info (id, user_id, no_cache = false) {
+    const params = { user_id, no_cache }
     return await this.SendApi(id, 'get_stranger_info', params)
   },
 

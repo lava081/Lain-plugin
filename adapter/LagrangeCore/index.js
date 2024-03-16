@@ -1166,7 +1166,7 @@ class LagrangeCore {
 
       source = {
         ...source,
-        // time: source.time,
+        time: source.message_id,
         seq: source.message_id,
         user_id: source.sender.user_id,
         message: raw_message,
