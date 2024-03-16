@@ -1501,7 +1501,7 @@ class Shamrock {
                 i.text = name
               }
             }
-            content += `[@${i.text}](mqqapi://card/show_pslcard?src_type=internal&version=1&uin=${i.qq})`
+            content += `[\`@${i.text}\`](mqqapi://card/show_pslcard?src_type=internal&version=1&uin=${i.qq})`
             raw_message.push(`<@${i.qq}>`)
           }
           break
