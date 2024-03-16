@@ -1490,7 +1490,7 @@ class Shamrock {
           if (i.qq === 'all') {
             content += '[@全体成员](mqqapi://markdown/mention?at_type=everyone)'
           } else {
-            if (!i.name) {
+            if (!i.text) {
               // 先尝试从redis拿缓存名称，不存在从陌生人接口拿缓存
               let name = await redis.get(`lain:shamrock:at${i.qq}`)
               if (!name) {
@@ -1498,10 +1498,10 @@ class Shamrock {
                 name = name.nickname || name.card || i.qq
                 // 保存redis，过期时间7天
                 redis.set(`lain:shamrock:at${i.qq}`, name, { EX: 60 * 60 * 24 * 7 })
-                i.name = name
+                i.text = name
               }
             }
-            content += `[@${i.name}](mqqapi://markdown/mention?at_type=1&at_tinyid=${i.qq})`
+            content += `[@${i.text}](mqqapi://markdown/mention?at_type=1&at_tinyid=${i.qq})`
             raw_message.push(`<@${i.qq}>`)
           }
           break
