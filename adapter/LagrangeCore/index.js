@@ -1527,12 +1527,12 @@ class LagrangeCore {
             if (group_id) {
               let groupMemberList
               await this.pickMember(group_id, i.qq, true, (res) => { groupMemberList = res })
-              i.name = groupMemberList?.card || groupMemberList?.nickname || i.name || i.qq
+              i.text = i.text || groupMemberList?.card || groupMemberList?.nickname || i.qq
             } else {
-              i.name = i.name || i.qq
+              i.text = i.text || i.qq
             }
 
-            content += `[\`@${i.name}\`](mqqapi://card/show_pslcard?src_type=internal&version=1&uin=${i.qq})`
+            content += `[\`@${i.text}\`](mqqapi://card/show_pslcard?src_type=internal&version=1&uin=${i.qq})`
             message.push({ type: 'at', data: { qq: String(i.qq) } })
             raw_message.push(`<@${i.qq}>`)
           }
