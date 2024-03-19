@@ -486,6 +486,19 @@ let api = {
     return await this.SendApi(id, 'get_group_msg_history', params)
   },
 
+  
+  /**
+  * 获取好友历史消息
+  * @param {string} id - 机器人QQ 通过e.bot、Bot调用无需传入
+  * @param {number} user_id - 好友qq号
+  * @param {number} count - 获取的消息数量（默认为20）
+  * @param {number} message_id - 起始消息的message_id（默认为0，表示从最后一条发言往前）
+  */
+  async get_friend_msg_history (id, user_id, count, message_id) {
+    const params = { user_id, message_id, count }
+    return await this.SendApi(id, 'get_friend_msg_history', params)
+  },
+
   /**
   * 清除本地缓存消息
   * @param {string} id - 机器人QQ 通过e.bot、Bot调用无需传入
@@ -734,6 +747,7 @@ let api = {
 
     return {
       ...res,
+      time: res.message_id,
       seq: res.message_id,
       rand: 1
     }
