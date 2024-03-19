@@ -604,7 +604,7 @@ class LagrangeCore {
        */
       getChatHistory: async (msg_id, num, reply) => {
         msg_id = Number(msg_id)
-        let { messages } = await api.get_history_msg(this.id, 'private', user_id, null, num, msg_id)
+        let { messages } = await api.get_friend_msg_history(this.id, user_id, num, msg_id)
         messages = messages.map(async m => {
           let result = await this.getMessage(m.message, null, reply)
           m = Object.assign(m, result)
