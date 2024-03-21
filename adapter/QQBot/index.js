@@ -694,7 +694,8 @@ export default class adapterQQBot {
     }
 
     const type = 'audio'
-    const _path = process.cwd() + '/resources'
+    const _path = process.cwd() + '/resources/temp'
+    await fs.promises.mkdir(_path)
     const mp3 = path.join(_path, `${Date.now()}.mp3`)
     const pcm = path.join(_path, `${Date.now()}.pcm`)
     const silk = path.join(_path, `${Date.now()}.silk`)
@@ -718,6 +719,10 @@ export default class adapterQQBot {
         common.mark('Lain-plugin', 'pcm => silk 完成!')
       })
       .catch((err) => {
+        /** 删除初始mp3文件 */
+        fs.promises.unlink(mp3, () => { })
+        /** 删除pcm文件 */
+        fs.promises.unlink(pcm, () => { })
         common.error('Lain-plugin', `转码失败${err}`)
         return { type: 'text', text: `转码失败${err}` }
       })
