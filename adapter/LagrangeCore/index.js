@@ -1381,9 +1381,7 @@ class LagrangeCore {
           try {
             /** 笨比复读! */
             if (i?.url) i.file = i.url
-            /** 视频文件需要先上传到手机 */
-            const { file } = await api.download_file(this.id, `base64://${await Bot.Base64(i.file)}`)
-            message.push({ type: 'video', data: { file: `file://${file}` } })
+            message.push({ type: 'video', data: { file: i.file } })
           } catch (err) {
             common.error(this.id, '视频上传失败:', err)
             message.push({ type: 'text', data: { text: JSON.stringify(err) } })
