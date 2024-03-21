@@ -655,22 +655,16 @@ class LagrangeCore {
   }
 
   /** 上传群文件 */
-  async upload_group_file (group_id, filePath) {
-    if (!fs.existsSync(filePath)) return true
-    /** 先传到shamrock... */
-    const base64 = 'base64://' + fs.readFileSync(filePath).toString('base64')
-    const { file } = await api.download_file(this.id, base64)
-    const name = path.basename(filePath) || Date.now() + path.extname(filePath)
+  async upload_group_file (group_id, file) {
+    if (!fs.existsSync(file)) return true
+    const name = path.basename(file) || Date.now() + path.extname(file)
     return await api.upload_group_file(this.id, group_id, file, name)
   }
 
   /** 上传好友文件 */
-  async upload_private_file (user_id, filePath) {
-    if (!fs.existsSync(filePath)) return true
-    /** 先传到shamrock... */
-    const base64 = 'base64://' + fs.readFileSync(filePath).toString('base64')
-    const { file } = await api.download_file(this.id, base64)
-    const name = path.basename(filePath) || Date.now() + path.extname(filePath)
+  async upload_private_file (user_id, file) {
+    if (!fs.existsSync(file)) return true
+    const name = path.basename(file) || Date.now() + path.extname(file)
     return await api.upload_private_file(this.id, user_id, file, name)
   }
 
@@ -1254,12 +1248,7 @@ class LagrangeCore {
           break
         case 'record':
           try {
-            let file = await Bot.Base64(i.file, { http: true })
-            /** 非链接需要先上传到手机 */
-            if (!/^http(s)?:\/\//.test(file)) {
-              const data = await api.download_file(this.id, `base64://${file}`)
-              file = `file://${data.file}`
-            }
+            let file = await Bot.Base64(i.file, { http: true ,file:true })
             message.push({ type: 'record', data: { file } })
             raw_message.push(`<语音:${i.file}>`)
           } catch (err) {
