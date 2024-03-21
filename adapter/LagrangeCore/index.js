@@ -1541,12 +1541,7 @@ class LagrangeCore {
           break
         case 'record':
           try {
-            let file = await Bot.Base64(i.file, { http: true })
-            /** 非链接需要先上传到手机 */
-            if (!/^http(s)?:\/\//.test(file)) {
-              const data = await api.download_file(this.id, `base64://${file}`)
-              file = `file://${data.file}`
-            }
+            let file = await Bot.Base64(i.file, { http: true ,file:true })
             message.push({ type: 'record', data: { file } })
             raw_message.push(`<语音:${i.file}>`)
           } catch (err) {
@@ -1561,9 +1556,7 @@ class LagrangeCore {
           try {
             /** 笨比复读! */
             if (i?.url) i.file = i.url
-            /** 视频文件需要先上传到手机 */
-            const { file } = await api.download_file(this.id, `base64://${await Bot.Base64(i.file)}`)
-            message.push({ type: 'video', data: { file: `file://${file}` } })
+            message.push({ type: 'video', data: { file: i.file } })
           } catch (err) {
             common.error(this.id, '视频上传失败:', err)
             message.push({ type: 'text', data: { text: JSON.stringify(err) } })
