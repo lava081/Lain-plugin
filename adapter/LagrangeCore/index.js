@@ -1554,9 +1554,15 @@ class LagrangeCore {
           break
         case 'record':
           try {
-            let file = await Bot.Base64(i.file, { http: true ,file:true })
+            let file = await Bot.FormatFile(i.file)
+            /** 转换buffer,但愿吧 */
+            if (!/^http(s)?:\/\/|^file:\/\//.test(file)) {
+              file = 'base64://' + await Bot.Base64(file)
+              raw_message.push(`<语音:base64://...>`)
+            } else {
+              raw_message.push(`<语音:${file}>`)
+            }
             message.push({ type: 'record', data: { file } })
-            raw_message.push(`<语音:${i.file}>`)
           } catch (err) {
             common.error(this.id, '语音上传失败:', err)
             /** 都报错了还发啥？...我以前写的什么牛马 */
@@ -1569,13 +1575,20 @@ class LagrangeCore {
           try {
             /** 笨比复读! */
             if (i?.url) i.file = i.url
-            message.push({ type: 'video', data: { file: i.file } })
+            let file = await Bot.FormatFile(i.file)
+            /** 转换buffer,但愿吧 */
+            if (!/^http(s)?:\/\/|^file:\/\//.test(file)) {
+              file = 'base64://' + await Bot.Base64(file)
+              raw_message.push(`<视频:base64://...>`)
+            } else {
+              raw_message.push(`<视频:${file}>`)
+            }
+            message.push({ type: 'video', data: { file } })
           } catch (err) {
             common.error(this.id, '视频上传失败:', err)
             message.push({ type: 'text', data: { text: JSON.stringify(err) } })
             raw_message.push(JSON.stringify(err))
           }
-          raw_message.push(`<视频:${i.file}>`)
           break
         case 'image':
           try {
