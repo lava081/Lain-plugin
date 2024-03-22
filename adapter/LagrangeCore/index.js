@@ -323,6 +323,7 @@ class LagrangeCore {
       uin: this.id,
       tiny_id: String(this.id),
       avatar: `https://q1.qlogo.cn/g?b=qq&s=0&nk=${this.id}`,
+      config: { markdown: { type: 4 } },
       sendApi: async (action, params) => await this.sendApi(action, params),
       pickMember: (group_id, user_id) => this.pickMember(group_id, user_id),
       pickUser: (user_id) => this.pickFriend(Number(user_id)),
