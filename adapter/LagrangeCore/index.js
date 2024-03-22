@@ -743,7 +743,7 @@ class LagrangeCore {
         try {
           const { message: content } = await this.getLagrangeCore(i.message, false)
           // const id = await this.sendApi('send_forward_msg', { messages: [{ type: 'node', data: { name: this.nickname || 'LagrangeCore', uin: String(this.id), content } }] })
-          makeForwardMsg.message.push({ type: 'node', data: { type: 'node', data: { name: (i.nickname == Bot.nickname) ? this.nickname : (i.nickname || 'LagrangeCore'), uin: String((i.user_id == Bot.uin) ? this.id : i.user_id), content } } })
+          makeForwardMsg.message.push({ type: 'node', data: { type: 'node', data: { name: (i.nickname == Bot.nickname) ? (this.nickname || 'LagrangeCore') : i.nickname, uin: String((i.user_id == Bot.uin) ? this.id : i.user_id), content } } })
         } catch (err) {
           common.error(this.id, err)
         }
