@@ -734,16 +734,16 @@ class LagrangeCore {
         }
       } else {
         if (!data[i]?.message) continue
-        msg.push(data[i].message)
+        msg.push(data[i])
       }
     }
 
     if (msg.length) {
       for (let i of msg) {
         try {
-          const { message: content } = await this.getLagrangeCore(i, false)
+          const { message: content } = await this.getLagrangeCore(i.message, false)
           // const id = await this.sendApi('send_forward_msg', { messages: [{ type: 'node', data: { name: this.nickname || 'LagrangeCore', uin: String(this.id), content } }] })
-          makeForwardMsg.message.push({ type: 'node', data: { type: 'node', data: { name: this.nickname || 'LagrangeCore', uin: String(this.id), content } } })
+          makeForwardMsg.message.push({ type: 'node', data: { type: 'node', data: { name: (i.nickname == Bot.nickname) ? this.nickname : (i.nickname || 'LagrangeCore'), uin: String((i.user_id == Bot.uin) ? this.id : i.user_id), content } } })
         } catch (err) {
           common.error(this.id, err)
         }
