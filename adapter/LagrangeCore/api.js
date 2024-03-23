@@ -715,7 +715,7 @@ let api = {
 
     let res
     if (node) {
-      const id = await this.SendApi(uin, 'send_forward_msg', { messages: message.map(i => i.data) })
+      const id = await this.SendApi(uin, 'send_private_forward_msg', { user_id, messages: message.map(i => i.data) })
       res = await this.SendApi(uin, 'send_private_msg', { user_id, message: { type: 'forward', data: { id } } })
     } else if (content) {
       const message = {
@@ -757,7 +757,7 @@ let api = {
 
     let res
     if (node) {
-      const id = await this.SendApi(uin, 'send_forward_msg', { messages: message.map(i => i.data) })
+      const id = await this.SendApi(uin, 'send_group_forward_msg', { group_id, messages: message.map(i => i.data) })
       res = await this.SendApi(uin, 'send_group_msg', { group_id, message: { type: 'forward', data: { id } } })
     } else if (content) {
       const message = {
