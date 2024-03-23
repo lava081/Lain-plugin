@@ -893,7 +893,7 @@ class LagrangeCore {
     /** 快速撤回 */
     e.recall = async () => await api.delete_msg(this.id, message_id)
     /** 快速回复 */
-    e.reply = async (msg, quote) => await this.sendReplyMsg(e, group_id || user_id, msg, quote)
+    e.reply = async (msg, quote) => await this.sendReplyMsg(e, group_id, user_id, msg, quote)
     /** 获取对应用户头像 */
     e.getAvatarUrl = (size = 0) => `https://q1.qlogo.cn/g?b=qq&s=${size}&nk=${user_id}`
 
@@ -1176,11 +1176,12 @@ class LagrangeCore {
   /**
  * 回被动消息
  * @param {object} e - 接收的e - 喵崽格式
- * @param {number} id - 目标QQ
+ * @param {number} group_id
+ * @param {number} user_id
  * @param {string|object|array} msg - 消息内容
  * @param {boolean} quote - 是否引用回复
  */
-  async sendReplyMsg (e, id, msg, quote) {
+  async sendReplyMsg (e, group_id, user_id, msg, quote) {
     let { message, raw_message, node } = await this.getLagrangeCore(msg)
 
     if (quote) {
@@ -1188,8 +1189,8 @@ class LagrangeCore {
       raw_message = '[回复]' + raw_message
     }
 
-    if (e.isGroup) return await api.send_group_msg(this.id, id, message, raw_message, node)
-    return await api.send_private_msg(this.id, id, message, raw_message, node)
+    if (group_id) return await api.send_group_msg(this.id, group_id, message, raw_message, node)
+    return await api.send_private_msg(this.id, user_id, message, raw_message, node)
   }
 
   /**
