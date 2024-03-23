@@ -115,7 +115,7 @@ export default class adapterQQBot {
     return {
       is_admin: false,
       is_owner: false,
-      recallMsg: async () => Promise.reject(new Error('QQBot未支持')),
+      recallMsg: async (msg_id) => await this.recallGroupMsg(groupID, msg_id),
       sendMsg: async (msg) => await this.sendGroupMsg(groupID, msg),
       makeForwardMsg: async (data) => await common.makeForwardMsg(data),
       getChatHistory: async () => [],
@@ -179,6 +179,10 @@ export default class adapterQQBot {
     return Number(id) ? `https://q1.qlogo.cn/g?b=qq&s=${size}&nk=${id}` : `https://q.qlogo.cn/qqapp/${this.id}/${id.split('-')[1] || id}/${size}`
   }
 
+  async recallGroupMsg (group_id, message_id) {
+    return await this.sdk.recallGroupMessage(group_id, message_id)
+  }
+
   /** 转换格式给云崽处理 */
   async message (data, isGroup) {
     let { self_id: tinyId, ...e } = data
@@ -223,7 +227,7 @@ export default class adapterQQBot {
     /** 构建快速回复消息 */
     e.reply = async (msg, quote) => await this.sendReplyMsg(e, msg, quote)
     /** 快速撤回 */
-    e.recall = async () => { }
+    e.recall = async () => await this.recallGroupMsg(data.group_id, data.message_id)
     /** 将收到的消息转为字符串 */
     e.toString = () => e.raw_message
     /** 获取对应用户头像 */
