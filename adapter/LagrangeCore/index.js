@@ -93,7 +93,9 @@ class LagrangeCore {
       }
     })().catch(common.error)
     switch (data.notice_type) {
-      case 'group':
+      case "group_recall":
+        data.sub_type = 'recall'
+        data.notice_type = 'group'
         try {
           let gl = Bot[this.id].gl.get(data.group_id)
           data = { ...data, ...gl }
@@ -103,7 +105,7 @@ class LagrangeCore {
         } else {
           common.info(this.id, `群消息撤回：[${data.group_id}]${data.operator_id} 撤回 ${data.user_id}的消息 ${data.message_id} `)
         }
-        break
+        return await Bot.emit('notice.group', await this.ICQQEvent(data))
       case 'group_increase': {
         data.notice_type = 'group'
         let subType = data.sub_type
@@ -194,6 +196,19 @@ class LagrangeCore {
         this.loadGroupMemberList(data.group_id)
         return await Bot.emit('notice.group', await this.ICQQEvent(data))
       }
+      case 'poke':
+        if (!data.group_id) {
+          common.info(this.id, `好友[${data.user_id}]戳了戳[${data.target_id}]`)
+          data.notice_type = 'friend'
+          data.operator_id = data.user_id
+          return await Bot.emit('notice.friend', await this.ICQQEvent(data))
+        } else {
+          common.info(this.id, `群[${data.group_id}]成员[${data.user_id}]戳了戳[${data.target_id}]`)
+          data.notice_type = 'group'
+          data.operator_id = data.user_id
+          data.user_id = data.target_id
+          return await Bot.emit('notice.group', await this.ICQQEvent(data))
+        }
       case 'notify':
         switch (data.sub_type) {
           case 'poke': {
@@ -217,9 +232,10 @@ class LagrangeCore {
         // if (time - pokeCD < 1500) return false
         // pokeCD = time
         break
-      case 'friend_add':
-        // shamrock暂未实现
+      case 'friend_add':{
+        common.info(this.id, `好友请求[${data.user_id}]`)
         break
+      }
       case 'essence': {
         // todo
         common.info(this.id, `群[${data.group_id}]成员[${data.sender_id}]的消息[${data.message_id}]被[${data.operator_id}]${data.sub_type === 'add' ? '设为' : '移除'}精华`)
