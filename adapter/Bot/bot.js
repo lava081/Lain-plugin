@@ -7,6 +7,7 @@ import crypto from 'crypto'
 import common from '../../lib/common/common.js'
 import Cfg from '../../lib/config/config.js'
 import { fileTypeFromBuffer } from 'file-type'
+import path from 'path'
 
 /**
 * 传入文件，返回Buffer
@@ -315,12 +316,12 @@ Bot.toType = function (i) {
 */
 Bot.FormatFile = async function (file) {
   const str = function () {
-    if (fs.existsSync(file.replace(/^file:\/\//, ''))) {
+    if (fs.existsSync(path.resolve(file))) {
+      return `file://${path.resolve(file)}`
+    } else if (fs.existsSync(file.replace(/^file:\/\//, ''))) {
       return `file://${file.replace(/^file:\/\//, '')}`
     } else if (fs.existsSync(file.replace(/^file:\/\/\//, ''))) {
       return file.replace(/^file:\/\/\//, 'file://')
-    } else if (fs.existsSync(file)) {
-      return `file://${file}`
     }
     return file
   }
