@@ -422,7 +422,7 @@ export default class adapterQQBot {
               }
             } else {
               for (let p of (await Bot.HandleURL(i.text.trim()))) {
-                p.type === 'image' ? image.push(await this.getImage(p.file)) : text.push(p.text)
+                p.type === 'image' ? image.push(await this.getImage(p.file, e)) : text.push(p.text)
               }
             }
           }
