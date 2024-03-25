@@ -1375,7 +1375,8 @@ class LagrangeCore {
           try {
             let file = await Bot.FormatFile(i.file)
             /** 转换buffer,但愿吧 */
-            if (/^base64:\/\//.test(file)) {
+            if (!/^http(s)?:\/\/|^file:\/\//.test(file)) {
+              file = 'base64://' + await Bot.Base64(file)
               raw_message.push(`<语音:base64://...>`)
             } else {
               raw_message.push(`<语音:${file}>`)
@@ -1395,7 +1396,8 @@ class LagrangeCore {
             if (i?.url) i.file = i.url
             let file = await Bot.FormatFile(i.file)
             /** 转换buffer,但愿吧 */
-            if (/^base64:\/\//.test(file)) {
+            if (!/^http(s)?:\/\/|^file:\/\//.test(file)) {
+              file = 'base64://' + await Bot.Base64(file)
               raw_message.push(`<视频:base64://...>`)
             } else {
               raw_message.push(`<视频:${file}>`)
@@ -1413,7 +1415,8 @@ class LagrangeCore {
             if (i?.url) i.file = i.url
             let file = await Bot.FormatFile(i.file)
             /** 转换buffer,但愿吧 */
-            if (/^base64:\/\//.test(file)) {
+            if (!/^http(s)?:\/\/|^file:\/\//.test(file)) {
+              file = 'base64://' + await Bot.Base64(file)
               raw_message.push('<图片:base64://...>')
             } else {
               raw_message.push(`<图片:${file}>`)
