@@ -8,6 +8,7 @@ import common from '../../lib/common/common.js'
 import Cfg from '../../lib/config/config.js'
 import { fileTypeFromBuffer } from 'file-type'
 import path from 'path'
+// import { core } from 'icqq'
 
 /**
 * 传入文件，返回Buffer
@@ -316,7 +317,13 @@ Bot.toType = function (i) {
 */
 Bot.FormatFile = async function (file) {
   const str = function () {
-    if (fs.existsSync(path.resolve(file))) {
+    if (file.includes('gchat.qpic.cn') && !file.startsWith('https://')) {
+      return `https://${file}`
+    } else if (file.startsWith('base64://')) {
+      return file
+    } else if (file.startsWith('http://') || file.startsWith('https://')) {
+      return file
+    } else if (fs.existsSync(path.resolve(file))) {
       return `file://${path.resolve(file)}`
     } else if (fs.existsSync(file.replace(/^file:\/\//, ''))) {
       return `file://${file.replace(/^file:\/\//, '')}`
@@ -506,4 +513,56 @@ Bot.HandleURL = async function (msg) {
   await Promise.all(promises)
   message.unshift({ type: 'text', text: msg })
   return message
+}
+
+/** 调用ICQQ解析proto */
+Bot.ICQQproto = function (file) {
+  return core.pb.decode(Buffer.from(file.replace('protobuf://', ''), 'base64'))
+}
+
+/** 解析高清语音 */
+Bot.getPttUrl = async function (fid) {
+  const body = core.pb.encode({
+    1: 1200,
+    2: 0,
+    14: {
+      10: Bot.uin,
+      20: fid,
+      30: 2
+    },
+    101: 17,
+    102: 104,
+    99999: {
+      90300: 1,
+      91000: 2,
+      91100: 1
+    }
+  })
+  const rsp = core.pb.decode(await Bot[Bot.uin].sendUni('PttCenterSvr.pb_pttCenter_CMD_REQ_APPLY_DOWNLOAD-1200', body))[14]
+  if (rsp[10] !== 0) { logger.error(rsp, '获取语音文件地址错误') }
+  const url = new URL(rsp[30][50].toString())
+  url.host = 'grouptalk.c2c.qq.com'
+  url.protocol = 'https'
+  return url.toString()
+}
+
+/**
+ * 上传多媒体文件
+ * @param id 机器人id
+ * @param target_id 接受者id
+ * @param target_type  接受者类型：user|group
+ * @param file_data 文件数据：可以是本地文件(file://)或网络地址(http://)或base64或Buffer
+ * @param file_type 数据类型：1 image;2 video; 3 audio
+ * @returns { url, width, height }
+ */
+Bot.uploadMedia = async function (id, target_id, target_type, file_data, file_type, decode = false) {
+  target_id = target_id.split('-')[1] || target_id.split('-')[0]
+  const result = await Bot[id].sdk.uploadMedia(target_id, target_type, file_data, file_type, decode)
+  const proto = await Bot.ICQQproto(result.file_info)
+  console.log(proto)
+  return {
+    url: `http://multimedia.nt.qq.com${String(proto[1][3][file_type == 'user'?29:34][30]).replace(/_/g, "%5F")}`,
+    width: Number(proto[1][3][22]),
+    height: Number(proto[1][3][23]),
+  }
 }

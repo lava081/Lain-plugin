@@ -422,7 +422,7 @@ export default class adapterQQBot {
               }
             } else {
               for (let p of (await Bot.HandleURL(i.text.trim()))) {
-                p.type === 'image' ? image.push(await this.getImage(p.file)) : text.push(p.text)
+                p.type === 'image' ? image.push(await this.getImage(p.file, e)) : text.push(p.text)
               }
             }
           }
@@ -592,50 +592,7 @@ export default class adapterQQBot {
   async getImage (file, e) {
     file = await Bot.FormatFile(file)
     const type = 'image'
-    if(e.bot.config?.markdown.type == 0 || e.bot.config?.markdown.type == 3 || (e.bot.config?.markdown.type == 2 && !await this.button(e))) {
-      return { type, file }
-    }
-    try {
-      /** 自定义图床 */
-      if (Bot?.imageToUrl) {
-        const { width, height, url } = await Bot.imageToUrl(file)
-        common.mark('Lain-plugin', `使用自定义图床发送图片：${url}`)
-        return { type, file: url, width, height }
-      } else if (Bot?.uploadFile) {
-        /** 老接口，后续废除 */
-        const url = await Bot.uploadFile(file)
-        common.mark('Lain-plugin', `使用自定义图床发送图片：${url}`)
-        const { width, height } = sizeOf(await Bot.Buffer(file))
-        console.warn('[Bot.uploadFile]接口即将废除，请查看文档更换新接口！')
-        return { type, file: url, width, height }
-      }
-      /** ICQQ */
-      if (Cfg.ICQQ && lain?.file?.uploadImage) {
-        const { url, width, height } = await lain.file.uploadImage(file)
-        common.mark('Lain-plugin', `使用ICQQ发送图片：${url}`)
-        return { type, file: url, width, height }
-      }
-    } catch (error) {
-      logger.error('[调用错误][自定义图床] 将继续公网发送图片')
-      logger.error(error)
-    }
-
-    try {
-      /** QQ图床 预留 */
-      const QQ = Bot[this.id].config.other.QQ
-      if (QQ) {
-        const { width, height, url } = await Bot.uploadQQ(file, QQ)
-        common.mark('Lain-plugin', `QQ图床上传成功：${url}`)
-        return { type, file: url, width, height }
-      }
-    } catch (error) {
-      logger.error('[调用错误][QQ图床] 将继续公网发送图片')
-      logger.error(error)
-    }
-
-    /** 公网 */
-    const { width, height, url } = await Bot.FileToUrl(file)
-    common.mark('Lain-plugin', `使用公网临时服务器：${url}`)
+    const { url, width, height } = await Bot.uploadMedia(this.id, e.group_id, 'group', file, 1)
     return { type, file: url, width, height }
   }
 
@@ -648,7 +605,7 @@ export default class adapterQQBot {
   async getAudio (file) {
     /** icqq高清语音 */
     if (typeof file === 'string' && file.startsWith('protobuf://')) {
-      return { type: 'audio', file: await lain.file.getPttUrl(lain.file.proto(file)[3]) }
+      return { type: 'audio', file: await Bot.getPttUrl(Bot.ICQQproto(file)[3]) }
     }
 
     try {
@@ -659,12 +616,6 @@ export default class adapterQQBot {
           common.mark('Lain-plugin', `<云转码:${url}>`)
           return { type: 'audio', file: url }
         }
-      }
-      /** ICQQ */
-      if (Cfg.ICQQ && lain?.file?.uploadPtt) {
-        const url = await lain.file.uploadPtt(file)
-        common.mark('Lain-plugin', `使用ICQQ发送语音：${url}`)
-        return { type: 'audio', file: url }
       }
     } catch (error) {
       logger.error('云转码失败')
