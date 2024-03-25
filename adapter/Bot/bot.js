@@ -8,7 +8,6 @@ import common from '../../lib/common/common.js'
 import Cfg from '../../lib/config/config.js'
 import { fileTypeFromBuffer } from 'file-type'
 import path from 'path'
-// import { core } from 'icqq'
 
 /**
 * 传入文件，返回Buffer
@@ -559,7 +558,6 @@ Bot.uploadMedia = async function (id, target_id, target_type, file_data, file_ty
   target_id = target_id.split('-')[1] || target_id.split('-')[0]
   const result = await Bot[id].sdk.uploadMedia(target_id, target_type, file_data, file_type, decode)
   const proto = await Bot.ICQQproto(result.file_info)
-  console.log(proto)
   return {
     url: `http://multimedia.nt.qq.com${String(proto[1][3][file_type == 'user'?29:34][30]).replace(/_/g, "%5F")}`,
     width: Number(proto[1][3][22]),
