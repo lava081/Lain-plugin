@@ -449,7 +449,7 @@ export default class adapterQQBot {
           }
           break
         case 'image':
-          image.push(await this.getImage(i?.url || i.file))
+          image.push(await this.getImage(i?.url || i.file, e))
           break
         case 'video':
           message.push(await this.getVideo(i?.url || i.file))
@@ -589,9 +589,12 @@ export default class adapterQQBot {
   }
 
   /** 处理图片 */
-  async getImage (file) {
+  async getImage (file, e) {
     file = await Bot.FormatFile(file)
     const type = 'image'
+    if(e.bot.config?.markdown.type == 0 || e.bot.config?.markdown.type == 3 || (e.bot.config?.markdown.type == 2 && !await this.button(e))) {
+      return { type, file }
+    }
     try {
       /** 自定义图床 */
       if (Bot?.imageToUrl) {
@@ -638,36 +641,7 @@ export default class adapterQQBot {
 
   /** 处理视频 */
   async getVideo (file) {
-    const type = 'video'
-    try {
-      /** 自定义接口 */
-      if (Bot?.videoToUrl) {
-        /** 视频接口 */
-        const url = await Bot.videoToUrl(file)
-        common.mark('Lain-plugin', `使用自定义服务器发送视频：${url}`)
-        return { type, file: url }
-      }
-      /** ICQQ */
-      if (Cfg.ICQQ && lain?.file?.uploadVideo) {
-        const url = await lain.file.uploadVideo(file)
-        common.mark('Lain-plugin', `使用ICQQ发送视频：${url}`)
-        return { type, file: url }
-      }
-    } catch (error) {
-      logger.error('[调用错误][自定义服务器] 将继续公网发送视频')
-      logger.error(error)
-    }
-
-    /** 现成url直接发 */
-    if (/^http(s)?:\/\//.test(file)) {
-      common.mark('Lain-plugin', `在线视频：${file}`)
-      return { type, file }
-    }
-
-    /** 公网 */
-    const { url } = await Bot.FileToUrl(file, type)
-    common.mark('Lain-plugin', `使用公网临时服务器：${url}`)
-    return { type, file: url }
+    return { type: 'video', file: await Bot.FormatFile(file) }
   }
 
   /** 处理语音 */
@@ -699,7 +673,7 @@ export default class adapterQQBot {
 
     const type = 'audio'
     const _path = process.cwd() + '/resources/temp'
-    await fs.promises.mkdir(_path)
+    try { await fs.promises.mkdir(_path) } catch (error) { }  // 尝试创建文件夹
     const mp3 = path.join(_path, `${Date.now()}.mp3`)
     const pcm = path.join(_path, `${Date.now()}.pcm`)
     const silk = path.join(_path, `${Date.now()}.silk`)
@@ -731,26 +705,7 @@ export default class adapterQQBot {
         return { type: 'text', text: `转码失败${err}` }
       })
 
-    try {
-      /** 自定义语音接口 */
-      if (Bot?.audioToUrl) {
-        const url = await Bot.audioToUrl(`file://${silk}`)
-        common.mark('Lain-plugin', `使用自定义服务器发送语音：${url}`)
-        setTimeout(() => {
-          fs.promises.unlink(silk, err => { logger.error(err) })
-        }, (Cfg.Server.InvalidTime || 30) * 1000)
-        return { type, file: url }
-      }
-    } catch (error) {
-      logger.error('[调用错误][自定义服务器] 将继续公网发送语音')
-    }
-
-    /** 公网 */
-    const { url } = await Bot.FileToUrl(`file://${silk}`, type)
-    common.mark('Lain-plugin', `使用公网临时服务器：${url}`)
-    setTimeout(() => {
-      fs.promises.unlink(silk, err => { logger.error(err) })
-    }, (Cfg.Server.InvalidTime || 30) * 1000)
+    const url = `file://${silk}`
     return { type, file: url }
   }
 
