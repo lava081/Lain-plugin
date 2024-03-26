@@ -4,7 +4,7 @@ import common from '../../lib/common/common.js'
 import { api, server, kritorCall, getPbDefByCmd, waitingMap, kritorEventCall } from './api.js'
 import { faceMap, pokeMap } from '../../model/shamrock/face.js'
 import grpc from '@grpc/grpc-js'
-import $root from "./generated/compiled.js";
+import { kritor } from "./generated/compiled.js";
 
 class Kritor {
   constructor (reverseCall, eventCall) {
@@ -52,27 +52,27 @@ class Kritor {
   async eventEvent (data) {
     common.debug('EventStructure:', data)
     // todo
-    let event = $root.kritor.event.EventStructure.decode(data)
+    let event = kritor.event.EventStructure.decode(data)
     switch (event.type) {
-      case $root.kritor.event.EventType.EVENT_TYPE_MESSAGE: {
+      case kritor.event.EventType.EVENT_TYPE_MESSAGE: {
         // todo
         let message = event.message
         await this.message(message)
         break
       }
-      case $root.kritor.event.EventType.EVENT_TYPE_REQUEST: {
+      case kritor.event.EventType.EVENT_TYPE_REQUEST: {
         let request = event.request
         await this.request(request)
         // todo
         break
       }
-      case $root.kritor.event.EventType.EVENT_TYPE_NOTICE: {
+      case kritor.event.EventType.EVENT_TYPE_NOTICE: {
         let notice = event.notice
         await this.notice(notice)
         // todo
         break
       }
-      case $root.kritor.event.EventType.EVENT_TYPE_CORE_EVENT: {
+      case kritor.event.EventType.EVENT_TYPE_CORE_EVENT: {
         // todo
         // 貌似没有 暂时不用管
         break
