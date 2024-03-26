@@ -37,6 +37,7 @@ git clone --depth=1 https://github.com/Zyy955/Lain-plugin ./plugins/Lain-plugin
 ## 2.安装依赖
 
 ```
+git submodule update --init
 pnpm install -P
 ```
 

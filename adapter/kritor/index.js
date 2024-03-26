@@ -4,6 +4,7 @@ import common from '../../lib/common/common.js'
 import { api, server, kritorCall, getPbDefByCmd, waitingMap, kritorEventCall } from './api.js'
 import { faceMap, pokeMap } from '../../model/shamrock/face.js'
 import grpc from '@grpc/grpc-js'
+import $root from "./generated/compiled.js";
 
 class Kritor {
   constructor (reverseCall, eventCall) {
@@ -21,15 +22,15 @@ class Kritor {
     // 被动gRPC下，Bot端发起请求的情况全程用这一个通道，用seq去对准
     this.reverseCall = reverseCall
 
-    this.reverseCall.on('message', (data) => this.reverseEvent(data))
+    this.reverseCall.on('data', (data) => this.reverseEvent(data))
 
-    this.reverseCall.on('cancelled', () => logger.warn(`[Lain-plugin] [${this.version}，${this.QQVersion}] QQ ${this.id} 连接已断开`))
+    this.reverseCall.on('end', () => logger.warn(`[Lain-plugin] [${this.version}，${this.QQVersion}] QQ ${this.id} 连接已断开`))
 
     // eventCall
     // notice request message之类的事件是从这个通道推送的
     this.eventCall = eventCall
 
-    this.eventCall.on('message', (data) => this.eventEvent(data))
+    this.eventCall.on('data', (data) => this.eventEvent(data))
 
     // this.eventCall.on('cancelled', () => logger.warn(`[Lain-plugin] [${this.version}，${this.QQVersion}] QQ ${this.id} 连接已断开`))
   }
@@ -51,6 +52,32 @@ class Kritor {
   async eventEvent (data) {
     common.debug('EventStructure:', data)
     // todo
+    let event = $root.kritor.event.EventStructure.decode(data)
+    switch (event.type) {
+      case $root.kritor.event.EventType.EVENT_TYPE_MESSAGE: {
+        // todo
+        let message = event.message
+        await this.message(message)
+        break
+      }
+      case $root.kritor.event.EventType.EVENT_TYPE_REQUEST: {
+        let request = event.request
+        await this.request(request)
+        // todo
+        break
+      }
+      case $root.kritor.event.EventType.EVENT_TYPE_NOTICE: {
+        let notice = event.notice
+        await this.notice(notice)
+        // todo
+        break
+      }
+      case $root.kritor.event.EventType.EVENT_TYPE_CORE_EVENT: {
+        // todo
+        // 貌似没有 暂时不用管
+        break
+      }
+    }
   }
 
   /** 消息事件 */
@@ -69,7 +96,10 @@ class Kritor {
     await Bot.emit('message', await this.ICQQEvent(data))
   }
 
-  /** 通知事件 */
+  /**
+   * 通知事件
+   * @todo 要重写适配kritor
+   * */
   async notice (data) {
     /** 啊啊啊，逼死强迫症 */
     data.post_type = 'notice';
@@ -243,7 +273,10 @@ class Kritor {
     return await Bot.emit('notice', await this.ICQQEvent(data))
   }
 
-  /** 请求事件 */
+  /**
+   * 请求事件
+   * @todo 要重写适配kritor
+   * */
   async request (data) {
     data.post_type = 'request'
     switch (data.request_type) {
@@ -303,7 +336,11 @@ class Kritor {
     return await Bot.emit('request', await this.ICQQEvent(data))
   }
 
-  /** 注册Bot */
+  /**
+   * 注册Bot
+   * @todo 要重写适配kritor
+   * 这里不实现不好主动发请求
+   * */
   async LoadBot () {
     /** 构建基本参数 */
     Bot[this.id] = {
@@ -743,7 +780,10 @@ class Kritor {
     return await api.get_prohibited_member_list(this.id, group_id)
   }
 
-  /** 转换消息为ICQQ格式 */
+  /**
+   * 转换消息为ICQQ格式
+   * @todo 要重写适配kritor
+   * */
   async ICQQEvent (data) {
     const { post_type, group_id, user_id, message_type, message_id, sender } = data
     /** 初始化e */
@@ -1124,7 +1164,7 @@ class Kritor {
       let retryCount = 0
 
       while (retryCount < 2) {
-        source = await api.get_msg(this.id, msg_id)
+        source = await api.get_msg(this.id, msg_id, group_id)
         if (typeof source === 'string') {
           common.error(this.id, `获取引用消息内容失败，正在重试：第 ${retryCount} 次`)
           retryCount++

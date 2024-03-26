@@ -1,10 +1,9 @@
 import grpc from '@grpc/grpc-js'
 import protoLoader from '@grpc/proto-loader'
 import common from '../../lib/common/common.js'
-import $root from './generated/compiled.js'
+import { kritor } from './generated/compiled.js'
 import fetch, { fileFromSync, FormData } from 'node-fetch'
 import Cfg from '../../lib/config/config.js'
-import { randomUUID } from 'crypto'
 import { Mutex } from 'async-mutex'
 
 const _path = process.cwd()
@@ -69,9 +68,9 @@ export function getPbDefByCmd (cmd, type = 'rsp') {
     method += 'Request'
   }
   if (method) {
-    return $root.kritor[nsPkgMap[ns]][method]
+    return kritor[nsPkgMap[ns]][method]
   } else {
-    return $root.kritor[ns]()
+    return kritor[ns]()
   }
 }
 
@@ -123,11 +122,19 @@ export const api = {
   /**
    * 获取消息
    * @param {string} id - 机器人QQ 通过e.bot、Bot调用无需传入
-   * @param {string} message_id - 消息id
+   * @param {string} group_id - 群号
+   * @param {number} message_id - 消息id
    */
-  async get_msg (id, message_id) {
-    const params = { message_id }
-    return await this.SendApi(id, 'get_msg', params)
+  async get_msg (id, message_id, group_id) {
+    let params = kritor.message.GetMessageRequest.create({
+      messageId: message_id,
+      contact: kritor.message.Contact.create({
+        scene: kritor.message.Scene.GROUP,
+        peer: group_id
+      })
+    })
+    let buf = kritor.message.GetMessageRequest.encode(params).finish()
+    return await this.SendApi(id, 'MessageService.GetMessage', buf)
   },
 
   /**
@@ -887,6 +894,6 @@ export const api = {
     lain.seq = (lain.seq || Math.floor(Math.random() * 1000)) + 2
     release()
     common.debug(id, '[grpc] send -> ' + JSON.stringify({ seq: lain.seq, cmd }))
-    return await asyncSendAndWait(Bot[id].call, cmd, buf, lain.seq)
+    return await asyncSendAndWait(Bot[id].call || kritorEventCall, cmd, buf, lain.seq)
   }
 }
