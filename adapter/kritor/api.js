@@ -5,6 +5,7 @@ import { kritor } from './generated/compiled.js'
 import fetch, { fileFromSync, FormData } from 'node-fetch'
 import Cfg from '../../lib/config/config.js'
 import { Mutex } from 'async-mutex'
+import { Kritor } from "./index.js";
 
 const _path = process.cwd()
 const mutex = new Mutex()
@@ -28,7 +29,10 @@ const protoPackage = grpc.loadPackageDefinition(packageDefinition)
 const reverseImplementation = {
   ReverseStream: (call) => {
     const metadata = call.metadata.getMap()
-    console.log('Received ReverseStream metadata:', metadata)
+    common.debug('Received ReverseStream metadata:', metadata)
+    // call.on('data', data => {
+    //   common.debug('Received ReverseStream data:', data)
+    // })
     call.on('end', () => {
       console.log('ReverseStream end')
     })
@@ -40,6 +44,10 @@ const reverseImplementation = {
     //     seq: 100
     //   })
     // }
+    setTimeout(() => {
+      lain.kritor = new Kritor(call, kritorEventCall)
+    }, 300)
+
   }
 }
 
@@ -106,9 +114,9 @@ const eventImplementation = {
   RegisterPassiveListener: (call) => {
     const metadata = call.metadata.getMap()
     common.debug('Received RegisterPassiveListener metadata:', metadata)
-    call.on('data', (data) => {
-      common.debug('RegisterPassiveListener:', data)
-    })
+    // call.on('data', (data) => {
+    //   common.debug('RegisterPassiveListener:', data)
+    // })
     call.on('end', () => {
       common.debug('RegisterPassiveListener end')
     })
@@ -127,7 +135,7 @@ export const api = {
    */
   async get_msg (id, message_id, group_id) {
     let params = kritor.message.GetMessageRequest.create({
-      messageId: message_id,
+      message_id,
       contact: kritor.message.Contact.create({
         scene: kritor.message.Scene.GROUP,
         peer: group_id
@@ -142,9 +150,16 @@ export const api = {
    * @param {string} id - 机器人QQ 通过e.bot、Bot调用无需传入
    * @param {string} message_id - 消息id
    */
-  async delete_msg (id, message_id) {
-    const params = { message_id }
-    return await this.SendApi(id, 'delete_msg', params)
+  async delete_msg (id, message_id, peer, isGroup) {
+    let params = kritor.message.RecallMessageRequest.create({
+      message_id,
+      contact: kritor.message.Contact.create({
+        scene: isGroup ? kritor.message.Scene.GROUP : kritor.message.Scene.FRIEND,
+        peer
+      })
+    })
+    let buf = kritor.message.RecallMessageRequest.encode(params).finish()
+    return await this.SendApi(id, 'MessageService.RecallMessage', params, buf)
   },
 
   /**
@@ -152,7 +167,6 @@ export const api = {
    * @param {string} id - 机器人QQ 通过e.bot、Bot调用无需传入
    */
   async get_login_info (id) {
-    const params = {}
     return await this.SendApi(id, 'get_login_info', params)
   },
 

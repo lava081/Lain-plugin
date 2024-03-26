@@ -6,7 +6,7 @@ import { faceMap, pokeMap } from '../../model/shamrock/face.js'
 import grpc from '@grpc/grpc-js'
 import { kritor } from "./generated/compiled.js";
 
-class Kritor {
+export class Kritor {
   constructor (reverseCall, eventCall) {
     // /** 存一下 */
     // bot.request = request
@@ -20,6 +20,7 @@ class Kritor {
 
     // reverseCall
     // 被动gRPC下，Bot端发起请求的情况全程用这一个通道，用seq去对准
+    common.debug('new grpc')
     this.reverseCall = reverseCall
 
     this.reverseCall.on('data', (data) => this.reverseEvent(data))
@@ -52,27 +53,28 @@ class Kritor {
   async eventEvent (data) {
     common.debug('EventStructure:', data)
     // todo
-    let event = kritor.event.EventStructure.decode(data)
+    // let event = kritor.event.EventStructure.decode(data)
+    let event = data
     switch (event.type) {
-      case kritor.event.EventType.EVENT_TYPE_MESSAGE: {
+      case 'EVENT_TYPE_MESSAGE': {
         // todo
         let message = event.message
         await this.message(message)
         break
       }
-      case kritor.event.EventType.EVENT_TYPE_REQUEST: {
+      case 'EVENT_TYPE_REQUEST': {
         let request = event.request
         await this.request(request)
         // todo
         break
       }
-      case kritor.event.EventType.EVENT_TYPE_NOTICE: {
+      case 'EVENT_TYPE_NOTICE': {
         let notice = event.notice
         await this.notice(notice)
         // todo
         break
       }
-      case kritor.event.EventType.EVENT_TYPE_CORE_EVENT: {
+      case 'EVENT_TYPE_CORE_EVENT': {
         // todo
         // 貌似没有 暂时不用管
         break
@@ -80,10 +82,111 @@ class Kritor {
     }
   }
 
-  /** 消息事件 */
+  /**
+   * 消息事件
+   * @param {kritor.event.MessageEvent} data
+   * */
   async message (data) {
     /** 转置消息后给喵崽 */
-    await Bot.emit('message', await this.ICQQEvent(data))
+    // {post_type, group_id, user_id, message_type, message_id, sender}
+    let converted = data
+    converted.post_type = 'message'
+    switch (data.scene) {
+      case 'FRIEND': {
+        converted.user_id = data.sender.uin
+        converted.message_type = 'private'
+        break
+      }
+      case 'GROUP': {
+        converted.group_id = data.contact.peer
+        converted.message_type = 'group'
+        break
+      }
+    }
+    converted.message = data.elements.map(element => {
+      switch (element.type) {
+        case 'TEXT': {
+          return { type: 'text', data: { text: element.text.text } }
+        }
+        case 'AT': {
+          return { type: 'at', data: { qq: element.at.qq } }
+        }
+        case 'FACE': {
+          return { type: 'face', data: { id: element.face.id } }
+        }
+        case 'BUBBLE_FACE': {
+          return { type: 'bubble_face', data: { id: element.bubbleFace.id, count: element.bubbleFace.count } }
+        }
+        case 'REPLY': {
+          return { type: 'reply', data: { id: element.reply.message_id } }
+        }
+        case 'IMAGE': {
+          return { type: 'image', data: element.image }
+        }
+        case 'VOICE': {
+          return { type: 'voice', data: element.voice }
+        }
+        case 'VIDEO': {
+          return { type: 'video', data: element.video }
+        }
+        case 'BASKETBALL': {
+          return { type: 'basketball', data: element.basketball }
+        }
+        case 'DICE': {
+          return { type: 'dice', data: element.dice }
+        }
+        case 'RPS': {
+          return { type: 'rps', data: element.rps }
+        }
+        case 'POKE': {
+          return { type: 'poke', data: element.poke }
+        }
+        case 'MUSIC': {
+          return { type: 'music', data: element.music }
+        }
+        case 'WEATHER': {
+          return { type: 'weather', data: element.weather }
+        }
+        case 'LOCATION': {
+          return { type: 'location', data: element.location }
+        }
+        case 'SHARE': {
+          return { type: 'share', data: element.share }
+        }
+        case 'GIFT': {
+          return { type: 'gift', data: element.gift }
+        }
+        case 'MARKET_FACE': {
+          return { type: 'market_face', data: element.marketFace }
+        }
+        case 'FORWARD': {
+          return { type: 'forward', data: element.forward }
+        }
+        case 'CONTACT': {
+          return { type: 'contact', data: element.contact }
+        }
+        case 'JSON': {
+          return { type: 'json', data: element.json }
+        }
+        case 'XML': {
+          return { type: 'xml', data: element.xml }
+        }
+        case 'FILE': {
+          return { type: 'file', data: element.file }
+        }
+        case 'MARKDOWN': {
+          return { type: 'markdown', data: element.markdown }
+        }
+        case 'BUTTON': {
+          return { type: 'button', data: element.button }
+        }
+        case 'NODE': {
+          return { type: 'node', data: element.node }
+        }
+        default:
+      }
+    })
+    await Bot.emit('message', await this.ICQQEvent(converted))
   }
 
   /** 自身消息事件 */
@@ -533,7 +636,7 @@ class Kritor {
       /** 发送消息 */
       sendMsg: async (msg) => await this.sendGroupMsg(group_id, msg),
       /** 撤回消息 */
-      recallMsg: async (msg_id) => await this.recallMsg(msg_id),
+      recallMsg: async (msg_id) => await this.recallMsg(msg_id, group_id, true),
       /** 制作转发 */
       makeForwardMsg: async (message) => await this.makeForwardMsg(message),
       /** 戳一戳 */
@@ -599,7 +702,7 @@ class Kritor {
   pickFriend (user_id) {
     return {
       sendMsg: async (msg) => await this.sendFriendMsg(user_id, msg, false),
-      recallMsg: async (msg_id) => await this.recallMsg(msg_id),
+      recallMsg: async (msg_id) => await this.recallMsg(msg_id, user_id, false),
       makeForwardMsg: async (message) => await this.makeForwardMsg(message),
       getAvatarUrl: (size = 0) => `https://q1.qlogo.cn/g?b=qq&s=${size}&nk=${user_id}`,
       sendFile: async (filePath) => await this.upload_private_file(user_id, filePath),
@@ -771,8 +874,8 @@ class Kritor {
   }
 
   /** 撤回消息 */
-  async recallMsg (msg_id) {
-    return await api.delete_msg(this.id, msg_id)
+  async recallMsg (msg_id, peerId, isGroup) {
+    return await api.delete_msg(this.id, msg_id, peerId, isGroup)
   }
 
   /** 获取禁言列表 */
@@ -1049,32 +1152,18 @@ class Kritor {
           ToString.push(`{basketball:${i.data.id}}`)
           break
         /** 新猜拳 */
-        case 'new_rps':
+        case 'rps':
           message.push({ type: 'new_rps', ...i.data })
           raw_message.push('[猜拳]')
           log_message.push(`<猜拳:${i.data.id}>`)
           ToString.push(`{new_rps:${i.data.id}}`)
           break
         /** 新骰子 */
-        case 'new_dice':
+        case 'dice':
           message.push({ type: 'new_dice', ...i.data })
           raw_message.push('[骰子]')
           log_message.push(`<骰子:${i.data.id}>`)
           ToString.push(`{new_dice:${i.data.id}}`)
-          break
-        /** 骰子 (NTQQ废弃) */
-        case 'dice':
-          message.push({ type: 'dice', ...i.data })
-          raw_message.push('[骰子]')
-          log_message.push(`<骰子:${i.data.id}>`)
-          ToString.push(`{dice:${i.data}}`)
-          break
-        /** 剪刀石头布 (NTQQ废弃) */
-        case 'rps':
-          message.push({ type: 'rps', ...i.data })
-          raw_message.push('[剪刀石头布]')
-          log_message.push(`<剪刀石头布:${i.data.id}>`)
-          ToString.push(`{rps:${i.data}}`)
           break
         /** 戳一戳 */
         case 'poke':
@@ -1132,6 +1221,7 @@ class Kritor {
           log_message.push(`<礼物:${i.data.id}>`)
           ToString.push(`{gift:${i.data.id}}`)
           break
+        // todo markdown and buttons
         default:
           message.push({ type: 'text', ...i.data })
           i = JSON.stringify(i)
@@ -1400,7 +1490,6 @@ const runServer = () => {
   server.bindAsync('0.0.0.0:2956', grpc.ServerCredentials.createInsecure(), () => {
     // server.start()
     console.log('Kritor gRPC server running on port 2956')
-    lain.kritor = new Kritor(kritorCall, kritorEventCall)
   })
 }
 
