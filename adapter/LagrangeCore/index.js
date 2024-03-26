@@ -109,7 +109,6 @@ class LagrangeCore {
         data.notice_type = 'group'
         let subType = data.sub_type
         data.sub_type = 'increase'
-        data.user_id = data.target_id
         if (this.id === data.user_id) {
           common.info(this.id, `机器人加入群聊：[${data.group_id}}]`)
         } else {
@@ -128,7 +127,6 @@ class LagrangeCore {
       case 'group_decrease': {
         data.notice_type = 'group'
         data.sub_type = 'decrease'
-        data.user_id = data.target_id
         if (this.id === data.user_id) {
           common.info(this.id, data.operator_id
             ? `机器人被[${data.operator_id}]踢出群聊：[${data.group_id}}]`
@@ -148,7 +146,6 @@ class LagrangeCore {
         data.notice_type = 'group'
         data.set = data.sub_type === 'set'
         data.sub_type = 'admin'
-        data.user_id = data.target_id
         if (this.id === data.user_id) {
           let gml = await Bot[this.id].gml.get(data.group_id)
           gml[this.id] = { ...gml.get(this.id) }
@@ -162,13 +159,13 @@ class LagrangeCore {
           Bot[this.id].gml.set(data.group_id, { ...gml })
         } else {
           let gml = await Bot[this.id].gml.get(data.group_id)
-          gml[data.target_id] = { ...gml.get(data.target_id) }
+          gml[data.user_id] = { ...gml.get(data.user_id) }
           if (data.set) {
-            gml[data.target_id].role = 'admin'
-            common.info(this.id, `成员[${data.target_id}]在群[${data.group_id}]被设置为管理员`)
+            gml[data.user_id].role = 'admin'
+            common.info(this.id, `成员[${data.user_id}]在群[${data.group_id}]被设置为管理员`)
           } else {
-            gml[data.target_id].role = 'member'
-            common.info(this.id, `成员[${data.target_id}]在群[${data.group_id}]被取消管理员`)
+            gml[data.user_id].role = 'member'
+            common.info(this.id, `成员[${data.user_id}]在群[${data.group_id}]被取消管理员`)
           }
           Bot[this.id].gml.set(data.group_id, { ...gml })
         }
@@ -182,14 +179,14 @@ class LagrangeCore {
         } else {
           data.sub_type = 'ban'
         }
-        if (this.id === data.target_id) {
+        if (this.id === data.user_id) {
           common.info(this.id, data.duration === 0
-            ? `机器人[${this.id}]在群[${data.group_id}]被解除禁言`
-            : `机器人[${this.id}]在群[${data.group_id}]被禁言${data.duration}秒`)
+            ? `机器人[${this.id}]在群[${data.group_id}]被[${data.operator_id}]解除禁言`
+            : `机器人[${this.id}]在群[${data.group_id}]被[${data.operator_id}]禁言${data.duration}秒`)
         } else {
           common.info(this.id, data.duration === 0
-            ? `成员[${data.target_id}]在群[${data.group_id}]被解除禁言`
-            : `成员[${data.target_id}]在群[${data.group_id}]被禁言${data.duration}秒`)
+            ? `成员[${data.user_id}]在群[${data.group_id}]被[${data.operator_id}]解除禁言`
+            : `成员[${data.user_id}]在群[${data.group_id}]被[${data.operator_id}]禁言${data.duration}秒`)
         }
         // 异步加载或刷新该群的群成员列表以更新禁言时长
         this.loadGroupMemberList(data.group_id)
