@@ -623,7 +623,7 @@ export default class adapterQQBot {
     }
 
     const type = 'audio'
-    const _path = process.cwd() + '/resources/temp'
+    const _path = process.cwd() + '/temp/FileToUrl'
     try { await fs.promises.mkdir(_path) } catch (error) { }  // 尝试创建文件夹
     const mp3 = path.join(_path, `${Date.now()}.mp3`)
     const pcm = path.join(_path, `${Date.now()}.pcm`)
