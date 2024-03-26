@@ -555,12 +555,14 @@ Bot.getPttUrl = async function (fid) {
  * @returns { url, width, height }
  */
 Bot.uploadMedia = async function (id, target_id, target_type, file_data, file_type, decode = false) {
+  if (typeof file_type === 'string') file_type = ['image', 'video', 'audio'].indexOf(file_type) + 1
   target_id = target_id.split('-')[1] || target_id.split('-')[0]
   const result = await Bot[id].sdk.uploadMedia(target_id, target_type, file_data, file_type, decode)
   const proto = await Bot.ICQQproto(result.file_info)
-  return {
+  if (file_type == 1)  return {
     url: `http://multimedia.nt.qq.com${String(proto[1][3][file_type == 'user'?29:34][30]).replace(/_/g, "%5F")}`,
     width: Number(proto[1][3][22]),
     height: Number(proto[1][3][23]),
-  }
+  } 
+  return true
 }
