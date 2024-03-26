@@ -7,9 +7,13 @@ import QQSDK from './QQBot/QQSDK.js'
 import QQBot from './QQBot/index.js'
 import QQGuild from './QQBot/QQGuild.js'
 import WeChat4u from './WeChat-Web/index.js'
+import Kritor from './kritor/index.js'
 
 /** 启动HTTP服务器，加载shamrock、Com微信适配器 */
 WebSocket.start()
+
+/** 启动gRPC服务器 */
+Kritor.runServer()
 
 /** 加载标准输入 */
 if (Cfg.Stdin.state) stdin()
