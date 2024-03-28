@@ -560,9 +560,13 @@ Bot.uploadMedia = async function (id, target_id, target_type, file_data, file_ty
   const result = await Bot[id].sdk.uploadMedia(target_id, target_type, file_data, file_type, decode)
   const proto = await Bot.ICQQproto(result.file_info)
   if (file_type == 1)  return {
-    url: `http://multimedia.nt.qq.com${String(proto[1][3][file_type == 'user'?29:34][30]).replace(/_/g, "%5F")}`,
-    width: Number(proto[1][3][22]),
-    height: Number(proto[1][3][23]),
+    url: `http://${proto[1][2][1][2][3].encoded.toString()}${proto[1][3][34][30].encoded.toString().replace(/_/g, "%5F")}`,
+    name: proto[1][2][1][1][1][4].encoded.toString(),
+    md5: proto[1][2][1][1][1][2].encoded.toString().toUpperCase(),
+    width: proto[1][2][1][1][1][6],
+    height: proto[1][2][1][1][1][7],
+    size: proto[1][2][1][1][1][1],
+    proto
   } 
-  return true
+  return { proto }
 }
