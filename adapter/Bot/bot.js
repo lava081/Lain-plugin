@@ -552,21 +552,44 @@ Bot.getPttUrl = async function (fid) {
  * @param target_type  接受者类型：user|group
  * @param file_data 文件数据：可以是本地文件(file://)或网络地址(http://)或base64或Buffer
  * @param file_type 数据类型：1 image;2 video; 3 audio
- * @returns { url, width, height }
  */
 Bot.uploadMedia = async function (id, target_id, target_type, file_data, file_type, decode = false) {
   if (typeof file_type === 'string') file_type = ['image', 'video', 'audio'].indexOf(file_type) + 1
   target_id = target_id.split('-')[1] || target_id.split('-')[0]
   const result = await Bot[id].sdk.uploadMedia(target_id, target_type, file_data, file_type, decode)
-  const proto = await Bot.ICQQproto(result.file_info)
-  if (file_type == 1)  return {
-    url: `http://${proto[1][2][1][2][3].encoded.toString()}${proto[1][3][34][30].encoded.toString().replace(/_/g, "%5F")}`,
-    name: proto[1][2][1][1][1][4].encoded.toString(),
-    md5: proto[1][2][1][1][1][2].encoded.toString().toUpperCase(),
-    width: proto[1][2][1][1][1][6],
-    height: proto[1][2][1][1][1][7],
-    size: proto[1][2][1][1][1][1],
-    proto
-  } 
-  return { proto }
+  const file_info = await Bot.ICQQproto(result.file_info)
+  const file_uuid = await Bot.ICQQproto(result.file_uuid)
+  let ret = {
+    fileid: result.file_uuid,
+    base64: file_uuid[2].encoded.toString('hex').toUpperCase(),
+    size: file_uuid[3],
+    appid: file_uuid[4],
+    time: file_uuid[5],
+    name: String(file_info[1][2][1][1][1][4]),
+    sha1: String(file_info[1][2][1][1][1][3]).toUpperCase(),
+    file_info,
+    file_uuid
+  }
+  switch (file_type) {
+    case 1:ret = {
+      ...ret,
+      url: `http://${file_info[1][2][1][2][3].encoded.toString()}${file_info[1][3][34][30].encoded.toString().replace(/_/g, "%5F")}`,
+      width: file_info[1][2][1][1][1][6],
+      height: file_info[1][2][1][1][1][7]
+    } 
+    break
+    case 2: ret = {
+      ...ret,
+      width: file_info[1][2][1][1][1][6],
+      height: file_info[1][2][1][1][1][7],
+      length: file_info[1][2][1][1][1][8]
+    }
+    break
+    case 3: ret = {
+      ...ret,
+      length: file_info[1][2][1][1][1][8]
+    }
+    break
+  }
+  return ret
 }
