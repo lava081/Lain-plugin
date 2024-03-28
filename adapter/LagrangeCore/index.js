@@ -669,14 +669,24 @@ class LagrangeCore {
 
   /** 上传群文件 */
   async upload_group_file (group_id, file) {
-    if (!fs.existsSync(file)) return true
+    file = await Bot.FormatFile(file)
+    if (!file.match(/^file:\/\//)) {
+      file = await Bot.FileToPath(file)
+      file = await Bot.FormatFile(file)
+    }
+    file = file.replace(/^file:\/\//, '')
     const name = path.basename(file) || Date.now() + path.extname(file)
     return await api.upload_group_file(this.id, group_id, file, name)
   }
 
   /** 上传好友文件 */
   async upload_private_file (user_id, file) {
-    if (!fs.existsSync(file)) return true
+    file = await Bot.FormatFile(file)
+    if (!file.match(/^file:\/\//)) {
+      file = await Bot.FileToPath(file)
+      file = await Bot.FormatFile(file)
+    }
+    file = file.replace(/^file:\/\//, '')
     const name = path.basename(file) || Date.now() + path.extname(file)
     return await api.upload_private_file(this.id, user_id, file, name)
   }

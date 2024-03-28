@@ -365,9 +365,10 @@ let api = {
   * @param {number} group_id - 群号
   * @param {string} file - 本地文件路径
   * @param {string} name - 储存名称
+  * @param {string} folder - 目标文件夹 默认群文件根目录
   */
-  async upload_group_file (id, group_id, file, name) {
-    const params = { group_id, file, name }
+  async upload_group_file (id, group_id, file, name, folder = '/') {
+    const params = { group_id, file, name, folder }
     return await this.SendApi(id, 'upload_group_file', params)
   },
 
