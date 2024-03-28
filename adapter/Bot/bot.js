@@ -575,7 +575,8 @@ Bot.uploadMedia = async function (id, target_id, target_type, file_data, file_ty
       ...ret,
       url: `http://${file_info[1][2][1][2][3].encoded.toString()}${file_info[1][3][34][30].encoded.toString().replace(/_/g, "%5F")}`,
       width: file_info[1][2][1][1][1][6],
-      height: file_info[1][2][1][1][1][7]
+      height: file_info[1][2][1][1][1][7],
+      target_id: file_info[1][2][1][6][202][1]
     } 
     break
     case 2: ret = {
