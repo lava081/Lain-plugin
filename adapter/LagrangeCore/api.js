@@ -487,7 +487,7 @@ let api = {
     return await this.SendApi(id, 'get_group_msg_history', params)
   },
 
-  
+
   /**
   * 获取好友历史消息
   * @param {string} id - 机器人QQ 通过e.bot、Bot调用无需传入
@@ -716,8 +716,7 @@ let api = {
 
     let res
     if (node) {
-      const id = await this.SendApi(uin, 'send_private_forward_msg', { user_id, messages: message.map(i => i.data) })
-      res = await this.SendApi(uin, 'send_private_msg', { user_id, message: { type: 'forward', data: { id } } })
+      res = await this.SendApi(uin, 'send_private_forward_msg', { user_id, messages: message.map(i => i.data) })
     } else if (content) {
       const message = {
         type: 'longmsg',
@@ -758,8 +757,7 @@ let api = {
 
     let res
     if (node) {
-      const id = await this.SendApi(uin, 'send_group_forward_msg', { group_id, messages: message.map(i => i.data) })
-      res = await this.SendApi(uin, 'send_group_msg', { group_id, message: { type: 'forward', data: { id } } })
+      res = await this.SendApi(uin, 'send_group_forward_msg', { group_id, messages: message.map(i => i.data) })
     } else if (content) {
       const message = {
         type: 'longmsg',
