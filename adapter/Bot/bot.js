@@ -573,7 +573,7 @@ Bot.uploadMedia = async function (id, target_id, target_type, file_data, file_ty
   switch (file_type) {
     case 1:ret = {
       ...ret,
-      url: `http://multimedia.nt.qq.com${file_info[1][3][34][30].encoded.toString().replace(/_/g, "%5F")}`,
+      url: `http://${file_info[1][2][1][2][3].encoded.toString().replace('.com.cn','.com')}${file_info[1][3][34][30].encoded.toString().replace(/_/g, "%5F")}`,
       width: file_info[1][2][1][1][1][6],
       height: file_info[1][2][1][1][1][7],
       target_id: file_info[1][2][1][6][202][1]

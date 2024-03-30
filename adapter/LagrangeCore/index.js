@@ -486,7 +486,6 @@ class LagrangeCore {
       let gml = new Map()
       let memberList = await api.get_group_member_list(id, groupId)
       for (const user of memberList) {
-        user.card = user.nickname
         user.uin = this.id
         gml.set(user.user_id, user)
       }
@@ -514,7 +513,7 @@ class LagrangeCore {
 
     if (friendList && typeof friendList === 'object') {
       for (let i of friendList) {
-        i.nickname = i.user_name || i.user_displayname || i.user_remark
+        i.nickname = i.remark || i.nickname
         i.uin = this.id
         /** 给锅巴用 */
         Bot.fl.set(i.user_id, i)
@@ -724,7 +723,6 @@ class LagrangeCore {
     if (user_id == '88888' || user_id == 'stdin') user_id = this.id
     try {
       let member = await api.get_group_member_info(this.id, group_id, user_id, refresh)
-      member.card = member.nickname
       return member
     } catch {
       return { card: 'LagrangeCore', nickname: 'LagrangeCore' }
@@ -814,7 +812,7 @@ class LagrangeCore {
         } catch {
           group_name = group_id
         }
-        e.log_message && common.info(this.id, `<群:${group_name || group_id}><用户:${sender?.nickname || sender?.card}(${user_id})> -> ${e.log_message}`)
+        e.log_message && common.info(this.id, `<群:${group_name || group_id}><用户:${sender?.card || sender?.nickname}(${user_id})> -> ${e.log_message}`)
         /** 手动构建member */
         e.member = {
           info: {
@@ -836,7 +834,7 @@ class LagrangeCore {
         e.group = { ...this.pickGroup(group_id) }
       } else {
         /** 私聊消息 */
-        e.log_message && common.info(this.id, `<好友:${sender?.nickname || sender?.card}(${user_id})> -> ${e.log_message}`)
+        e.log_message && common.info(this.id, `<好友:${sender?.card || sender?.nickname}(${user_id})> -> ${e.log_message}`)
         e.friend = { ...this.pickFriend(user_id) }
       }
     }
@@ -853,7 +851,7 @@ class LagrangeCore {
         let fl = await Bot[this.id].api.get_stranger_info(Number(e.user_id))
         e.member = {
           ...fl,
-          card: fl?.nickname,
+          card: fl?.card,
           nickname: fl?.nickname
         }
       } else {
@@ -951,15 +949,16 @@ class LagrangeCore {
       switch (i.type) {
         /** AT 某人 */
         case 'at':
-          message.push({ type: 'at', qq: Number(i.data.qq) })
           try {
             let qq = i.data.qq
             ToString.push(`{at:${qq}}`)
             let groupMemberList = Bot[this.id].gml.get(group_id)?.get(qq)
-            let at = groupMemberList?.nickname || groupMemberList?.card || qq
+            let at = groupMemberList?.card || groupMemberList?.nickname || qq
+            message.push({ type: 'at', qq: Number(i.data.qq), text: at })
             raw_message.push(`@${at}`)
             log_message.push(at == qq ? `@${qq}` : `<@${at}:${qq}>`)
           } catch (err) {
+            message.push({ type: 'at', qq: Number(i.data.qq) })
             raw_message.push(`@${i.data.qq}`)
             log_message.push(`@${i.data.qq}`)
           }
@@ -1232,6 +1231,12 @@ class LagrangeCore {
    */
   async sendFriendMsg (user_id, msg) {
     let { message, raw_message, content, node } = await this.getLagrangeCore(msg)
+
+    /** 允许自行修改消息内容 */
+    if (content && Bot.processContent) {
+      ({ content, message } = await Bot.processContent(content, message))
+    }
+
     if (content) content = await this.sendMarkdown(content, msg)
     return await api.send_private_msg(this.id, user_id, message, raw_message, node, content)
   }
@@ -1243,6 +1248,12 @@ class LagrangeCore {
    */
   async sendGroupMsg (group_id, msg) {
     let { message, raw_message, content, node } = await this.getLagrangeCore(msg, true, group_id)
+
+    /** 允许自行修改消息内容 */
+    if (content && Bot.processContent) {
+      ({ content, message } = await Bot.processContent(content, message))
+    }
+
     if (content) content = await this.sendMarkdown(content, msg)
     return await api.send_group_msg(this.id, group_id, message, raw_message, node, content)
   }
@@ -1555,8 +1566,8 @@ class LagrangeCore {
             } else {
               i.text = i.text !== undefined ? i.text : i.qq
             }
-
-            content += `[\`@${i.text}\`](mqqapi://card/show_pslcard?src_type=internal&version=1&uin=${i.qq})`
+            /** 在replace部分尝试过滤tx专有表情字符 */
+            content += `[@${i.text.replace(/<\$(.*?)>/g, '')}](mqqapi://card/show_pslcard?src_type=internal&version=1&uin=${i.qq})`
             message.push({ type: 'at', data: { qq: String(i.qq) } })
             raw_message.push(`<@${i.qq}>`)
           }
