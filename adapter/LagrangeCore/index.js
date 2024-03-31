@@ -1219,7 +1219,7 @@ class LagrangeCore {
 
     /** 允许自行修改消息内容 */
     if (content && Bot.processContent) {
-      ({ content, message } = await Bot.processContent(content, message))
+      ({ content, message } = await Bot.processContent(content, message, { self_id: this.id }))
     }
 
     if (content) content = await this.sendMarkdown(content, msg)
@@ -1236,7 +1236,7 @@ class LagrangeCore {
 
     /** 允许自行修改消息内容 */
     if (content && Bot.processContent) {
-      ({ content, message } = await Bot.processContent(content, message))
+      ({ content, message } = await Bot.processContent(content, message, { self_id: this.id, group_id }))
     }
 
     if (content) content = await this.sendMarkdown(content, msg)

@@ -1200,7 +1200,7 @@ class Shamrock {
     let { message, raw_message, content, node } = await this.getShamrock(msg)
     /** 允许自行修改消息内容 */
     if (content && Bot.processContent) {
-      ({ content, message } = await Bot.processContent(content, message))
+      ({ content, message } = await Bot.processContent(content, message, { self_id: this.id }))
     }
     if (content) content = await this.sendMarkdown(content, msg)
     return await api.send_private_msg(this.id, user_id, message, raw_message, node, content)
@@ -1215,7 +1215,7 @@ class Shamrock {
     let { message, raw_message, content, node } = await this.getShamrock(msg)
     /** 允许自行修改消息内容 */
     if (content && Bot.processContent) {
-      ({ content, message } = await Bot.processContent(content, message, e))
+      ({ content, message } = await Bot.processContent(content, message, { self_id: this.id, group_id }))
     }
     if (content) content = await this.sendMarkdown(content, msg)
     return await api.send_group_msg(this.id, group_id, message, raw_message, node, content)
