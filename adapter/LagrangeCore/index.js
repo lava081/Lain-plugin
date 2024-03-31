@@ -815,19 +815,9 @@ class LagrangeCore {
         e.log_message && common.info(this.id, `<群:${group_name || group_id}><用户:${sender?.card || sender?.nickname}(${user_id})> -> ${e.log_message}`)
         /** 手动构建member */
         e.member = {
-          info: {
-            group_id,
-            user_id,
-            nickname: sender?.card,
-            last_sent_time: data?.time
-          },
-          card: sender?.card,
-          nickname: sender?.nickname,
-          group_id,
+          ...this.pickMember(group_id, user_id),
           is_admin: sender?.role === 'admin' || false,
           is_owner: sender?.role === 'owner' || false,
-          /** 获取头像 */
-          getAvatarUrl: (size = 0) => `https://q1.qlogo.cn/g?b=qq&s=${size}&nk=${user_id}`,
           /** 禁言 */
           mute: async (time) => await api.set_group_ban(this.id, group_id, user_id, time)
         }
@@ -848,12 +838,7 @@ class LagrangeCore {
       if (e.group_id) {
         e.notice_type = 'group'
         e.group = { ...this.pickGroup(group_id) }
-        let fl = await Bot[this.id].api.get_stranger_info(Number(e.user_id))
-        e.member = {
-          ...fl,
-          card: fl?.card,
-          nickname: fl?.nickname
-        }
+        e.member = await Bot[this.id].api.get_stranger_info(Number(e.user_id))
       } else {
         e.notice_type = 'friend'
         e.friend = { ...this.pickFriend(user_id) }
@@ -1566,8 +1551,7 @@ class LagrangeCore {
             } else {
               i.text = i.text !== undefined ? i.text : i.qq
             }
-            /** 在replace部分尝试过滤tx专有表情字符 */
-            content += `[@${i.text.replace(/<\$(.*?)>/g, '')}](mqqapi://card/show_pslcard?src_type=internal&version=1&uin=${i.qq})`
+            content += `[@${i.text.replace(/[\u0000-\u001F]/g, '')}](mqqapi://card/show_pslcard?src_type=internal&version=1&uin=${i.qq})`
             message.push({ type: 'at', data: { qq: String(i.qq) } })
             raw_message.push(`<@${i.qq}>`)
           }
