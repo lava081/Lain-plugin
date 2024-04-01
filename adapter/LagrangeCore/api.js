@@ -705,8 +705,7 @@ let api = {
 
     let res
     if (node) {
-      const id = await this.SendApi(uin, 'send_private_forward_msg', { user_id, messages: message.map(i => i.data) })
-      res = await this.SendApi(uin, 'send_private_msg', { user_id, message: { type: 'forward', data: { id } } })
+      res = await this.send_private_forward_msg(uin, user_id, message.map(i => i.data))
     } else {
       const params = { user_id, message }
       res = await this.SendApi(uin, 'send_private_msg', params)
@@ -739,8 +738,7 @@ let api = {
 
     let res
     if (node) {
-      const id = await this.SendApi(uin, 'send_group_forward_msg', { group_id, messages: message.map(i => i.data) })
-      res = await this.SendApi(uin, 'send_group_msg', { group_id, message: { type: 'forward', data: { id } } })
+      res = await this.send_group_forward_msg(uin, group_id, message.map(i => i.data))
     } else {
       const params = { group_id, message }
       res = await this.SendApi(uin, 'send_group_msg', params)
