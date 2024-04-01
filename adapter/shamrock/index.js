@@ -822,6 +822,7 @@ class Shamrock {
         e.notice_type = 'group'
         e.group = { ...this.pickGroup(group_id) }
         e.member = await Bot[this.id].api.get_stranger_info(Number(e.user_id))
+        e.nickname = e.member?.nickname
       } else {
         e.notice_type = 'friend'
         e.friend = { ...this.pickFriend(user_id) }
