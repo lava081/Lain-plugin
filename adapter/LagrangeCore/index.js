@@ -484,7 +484,6 @@ class LagrangeCore {
       let gml = new Map()
       let memberList = await api.get_group_member_list(id, groupId)
       for (const user of memberList) {
-        user.card = user.nickname
         user.uin = this.id
         gml.set(user.user_id, user)
       }
@@ -512,7 +511,7 @@ class LagrangeCore {
 
     if (friendList && typeof friendList === 'object') {
       for (let i of friendList) {
-        i.nickname = i.user_name || i.user_displayname || i.user_remark
+        i.nickname = i.user_remark || i.user_displayname || i.user_name
         i.uin = this.id
         /** 给锅巴用 */
         Bot.fl.set(i.user_id, i)
@@ -722,7 +721,6 @@ class LagrangeCore {
     if (user_id == '88888' || user_id == 'stdin') user_id = this.id
     try {
       let member = await api.get_group_member_info(this.id, group_id, user_id, refresh)
-      member.card = member.nickname
       return member
     } catch {
       return { card: 'LagrangeCore', nickname: 'LagrangeCore' }
@@ -812,29 +810,19 @@ class LagrangeCore {
         } catch {
           group_name = group_id
         }
-        e.log_message && common.info(this.id, `<群:${group_name || group_id}><用户:${sender?.nickname || sender?.card}(${user_id})> -> ${e.log_message}`)
+        e.log_message && common.info(this.id, `<群:${group_name || group_id}><用户:${sender?.card || sender?.nickname}(${user_id})> -> ${e.log_message}`)
         /** 手动构建member */
         e.member = {
-          info: {
-            group_id,
-            user_id,
-            nickname: sender?.card,
-            last_sent_time: data?.time
-          },
-          card: sender?.card,
-          nickname: sender?.nickname,
-          group_id,
+          ...this.pickMember(group_id, user_id),
           is_admin: sender?.role === 'admin' || false,
           is_owner: sender?.role === 'owner' || false,
-          /** 获取头像 */
-          getAvatarUrl: (size = 0) => `https://q1.qlogo.cn/g?b=qq&s=${size}&nk=${user_id}`,
           /** 禁言 */
           mute: async (time) => await api.set_group_ban(this.id, group_id, user_id, time)
         }
         e.group = { ...this.pickGroup(group_id) }
       } else {
         /** 私聊消息 */
-        e.log_message && common.info(this.id, `<好友:${sender?.nickname || sender?.card}(${user_id})> -> ${e.log_message}`)
+        e.log_message && common.info(this.id, `<好友:${sender?.card || sender?.nickname}(${user_id})> -> ${e.log_message}`)
         e.friend = { ...this.pickFriend(user_id) }
       }
     }
@@ -848,12 +836,8 @@ class LagrangeCore {
       if (e.group_id) {
         e.notice_type = 'group'
         e.group = { ...this.pickGroup(group_id) }
-        let fl = await Bot[this.id].api.get_stranger_info(Number(e.user_id))
-        e.member = {
-          ...fl,
-          card: fl?.nickname,
-          nickname: fl?.nickname
-        }
+        e.member = await Bot[this.id].api.get_stranger_info(Number(e.user_id))
+        e.nickname = e.member?.nickname
       } else {
         e.notice_type = 'friend'
         e.friend = { ...this.pickFriend(user_id) }
@@ -954,7 +938,7 @@ class LagrangeCore {
             let qq = i.data.qq
             ToString.push(`{at:${qq}}`)
             let groupMemberList = Bot[this.id].gml.get(group_id)?.get(qq)
-            let at = groupMemberList?.nickname || groupMemberList?.card || qq
+            let at = groupMemberList?.card || groupMemberList?.nickname || qq
             raw_message.push(`@${at}`)
             log_message.push(at == qq ? `@${qq}` : `<@${at}:${qq}>`)
           } catch (err) {
