@@ -125,10 +125,16 @@ class LagrangeCore {
         return await Bot.emit('notice.group', await this.ICQQEvent(data))
       }
       case 'group_decrease': {
+        switch (data.sub_type) {
+          case 'leave': {
+            data.operator_id = data.user_id
+            break
+          }
+        }
         data.notice_type = 'group'
         data.sub_type = 'decrease'
         if (this.id === data.user_id) {
-          common.info(this.id, data.operator_id
+          common.info(this.id, (data.operator_id === data.user_id)
             ? `机器人被[${data.operator_id}]踢出群聊：[${data.group_id}}]`
             : `机器人退出群聊：[${data.group_id}}]`)
           // 移除该群的信息
@@ -136,7 +142,7 @@ class LagrangeCore {
           Bot[this.id].gl.delete(data.group_id)
           Bot[this.id].gml.delete(data.group_id)
         } else {
-          common.info(this.id, data.operator_id
+          common.info(this.id, (data.operator_id === data.user_id)
             ? `成员[${data.user_id}]被[${data.operator_id}]踢出群聊：[${data.group_id}}]`
             : `成员[${data.user_id}]退出群聊[${data.group_id}}]`)
         }
