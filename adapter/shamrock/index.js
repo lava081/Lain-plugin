@@ -333,7 +333,7 @@ class Shamrock {
       stat: { start_time: Date.now() / 1000, recv_msg_cnt: 0 },
       apk: { display: this.QQVersion.split(' ')[0], version: this.QQVersion.split(' ')[1] },
       version: { id: 'shamrock', name: '三叶草', version: this.version.replace('Shamrock/', '') },
-      // sendApi: async (action, params) => await this.sendApi(action, params),
+      sendApi: async (action, params) => await api.SendApi(this.id, action, params),
       pickMember: (group_id, user_id) => this.pickMember(group_id, user_id),
       pickUser: (user_id) => this.pickFriend(Number(user_id)),
       pickFriend: (user_id) => this.pickFriend(Number(user_id)),
