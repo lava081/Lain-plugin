@@ -117,10 +117,10 @@ async function Button (e) {
           const button = await p[v.fnc](e)
           /** 无返回不添加 */
           if (button) return [...(Array.isArray(button) ? button : [button])]
-          return false
         }
       }
     }
+    return false
   } catch (error) {
     logger.error('Lain-plugin', error)
     return false
