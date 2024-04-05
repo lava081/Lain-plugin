@@ -1332,10 +1332,10 @@ class LagrangeCore {
               })
               return message
             }
-            return false
           }
         }
       }
+      return false
     } catch (error) {
       common.error('Lain-plugin', error)
       return false

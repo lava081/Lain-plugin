@@ -1303,10 +1303,10 @@ class Shamrock {
               })
               return message
             }
-            return false
           }
         }
       }
+      return false
     } catch (error) {
       common.error('Lain-plugin', error)
       return false
