@@ -1,5 +1,5 @@
 import { randomUUID } from 'crypto'
-import fs from 'fs'
+import sizeOf from 'image-size'
 import path from 'path'
 import { WebSocketServer } from 'ws'
 import common from '../../lib/common/common.js'
@@ -1621,7 +1621,7 @@ class LagrangeCore {
             /** 笨比复读! */
             if (i?.url) i.file = i.url
             i.file = await Bot.FormatFile(i.file)
-            const { width, height, url } = await Bot.imageToUrl(i.file)
+            const { width, height, url } = await this.imageToUrl(i.file)
             content += `![图片 #${width} #${height}] (${url})`
             raw_message.push(`<图片:${url}>`)
           } catch (err) {
@@ -1693,6 +1693,22 @@ class LagrangeCore {
       }
     }
     return { message, raw_message, content, node }
+  }
+
+  async imageToUrl (file) {
+    /** 转换buffer,但愿吧 */
+    let width, height
+    if (!/^http(s)?:\/\/|^file:\/\/|^base64:\/\//.test(file)) {
+      ({ width, height } = sizeOf(file))
+      file = 'base64://' + await Bot.Base64(file)
+    }
+    const url = (await api.upload_image(this.id, file))
+    .replace(/^https:\/\//, 'http://')
+    .replace(/.com.cn/, '.com')
+    if (!width){
+      ({ width, height } = sizeOf(await Bot.Buffer(url)))
+    }
+    return { url, width, height }
   }
 }
 
