@@ -1,6 +1,5 @@
 import { exec } from 'child_process'
 import fs from 'fs'
-import sizeOf from 'image-size'
 import lodash from 'lodash'
 import path from 'path'
 import moment from 'moment'
