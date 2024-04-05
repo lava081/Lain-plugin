@@ -591,10 +591,11 @@ let api = {
 
   /**
    * 图片预上传
+   * @param {string} id - 机器人QQ 通过e.bot、Bot调用无需传入
    * @param {string} file - 待上传的图片
    * @returns {Promise<string>} 图片链接
    */
-  async upload_image (file) {
+  async upload_image (id, file) {
     const params = { file }
     return await this.SendApi(id, 'upload_image', params)
   },
