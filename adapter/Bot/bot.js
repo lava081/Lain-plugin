@@ -322,12 +322,10 @@ Bot.FormatFile = async function (file) {
       return file
     } else if (file.startsWith('http://') || file.startsWith('https://')) {
       return file
-    } else if (fs.existsSync(path.resolve(file))) {
-      return `file://${path.resolve(file)}`
-    } else if (fs.existsSync(file.replace(/^file:\/\//, ''))) {
-      return `file://${file.replace(/^file:\/\//, '')}`
-    } else if (fs.existsSync(file.replace(/^file:\/\/\//, ''))) {
-      return file.replace(/^file:\/\/\//, 'file://')
+    } else if (fs.existsSync(path.resolve(file.replace(/^file:\/\//, '')))) {
+      return `file://${path.resolve(file.replace(/^file:\/\//, ''))}`
+    } else if (fs.existsSync(path.resolve(file.replace(/^file:\/\/\//, '')))) {
+      return `file://${path.resolve(file.replace(/^file:\/\/\//, ''))}`
     }
     return file
   }
