@@ -589,6 +589,16 @@ let api = {
     return data
   },
 
+  /**
+   * 图片预上传
+   * @param {string} file - 待上传的图片
+   * @returns {Promise<string>} 图片链接
+   */
+  async upload_image (file) {
+    const params = { file }
+    return await this.SendApi(id, 'upload_image', params)
+  },
+
   async httpApi (id, action, headers, data, query = '') {
     if (!Cfg.Shamrock.baseUrl || !Cfg.Shamrock.baseUrl.startsWith('http')) {
       return common.warn(id, '未配置Shamrock主动http端口')
