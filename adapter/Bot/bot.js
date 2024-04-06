@@ -553,7 +553,8 @@ Bot.getPttUrl = async function (fid) {
  */
 Bot.uploadMedia = async function (id, target_id, target_type, file_data, file_type, decode = false) {
   if (typeof file_type === 'string') file_type = ['image', 'video', 'audio'].indexOf(file_type) + 1
-  target_id = target_id.split('-')[1] || target_id.split('-')[0]
+  target_id = target_id.split('-')
+  target_id = target_id[1] || target_id[0]
   const result = await Bot[id].sdk.uploadMedia(target_id, target_type, file_data, file_type, decode)
   const file_info = await Bot.ICQQproto(result.file_info)
   const file_uuid = await Bot.ICQQproto(result.file_uuid)
