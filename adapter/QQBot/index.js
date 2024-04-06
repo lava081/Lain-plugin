@@ -179,6 +179,11 @@ export default class adapterQQBot {
   }
 
   async recallGroupMsg (group_id, message_id) {
+    if (Bot.QQToOpenid) {
+      try {
+        group_id = await Bot.QQToOpenid(groupId, e, 'group')
+      } catch { }
+    }
     return await this.sdk.recallGroupMessage(group_id, message_id)
   }
 
@@ -591,7 +596,13 @@ export default class adapterQQBot {
   async getImage (file, e) {
     file = await Bot.FormatFile(file)
     const type = 'image'
-    const { url, width, height } = await Bot.uploadMedia(this.id, e.group_id, 'group', file, 1)
+    let groupId = e.group_id
+    if (Bot.QQToOpenid) {
+      try {
+        groupId = await Bot.QQToOpenid(groupId, e, 'group')
+      } catch { }
+    }
+    const { url, width, height } = await Bot.uploadMedia(this.id, groupId, 'group', file, 1)
     return { type, file: url, width, height }
   }
 
@@ -722,6 +733,11 @@ export default class adapterQQBot {
 
     e.message.forEach(i => { if (i.type === 'text') e.msg = (e.msg || '') + (i.text || '').trim() })
     const { Pieces, reply } = await this.getQQBot(data, e)
+    if (Bot.QQToOpenid){
+      try {
+        userId = await Bot.QQToOpenid(userId, e, 'user')
+      } catch { }
+    }
     Pieces.forEach(i => {
       if (reply) i = Array.isArray(i) ? [...i, reply] : [i, reply]
       this.sdk.sendPrivateMessage(userId, i, this.sdk)
@@ -732,8 +748,6 @@ export default class adapterQQBot {
 
   /** 发送群消息 */
   async sendGroupMsg (groupID, data) {
-    /** 获取正确的id */
-    groupID = groupID.split('-')?.[1] || groupID
     /** 构建一个普通e给按钮用 */
     let e = {
       bot: Bot[this.id],
@@ -744,6 +758,15 @@ export default class adapterQQBot {
 
     e.message.forEach(i => { if (i.type === 'text') e.msg = (e.msg || '') + (i.text || '').trim() })
     const { Pieces, reply } = await this.getQQBot(data, e)
+    /** 获取正确的id */
+    if (Bot.QQToOpenid) {
+      try {
+        groupID = await Bot.QQToOpenid(groupId, e, 'group')
+      } catch {
+        groupID = groupID.split('-')[1] || groupID.split('-')[0] || groupID
+      }
+    }
+
     Pieces.forEach(i => {
       if (reply) i = Array.isArray(i) ? [...i, reply] : [i, reply]
       this.sdk.sendGroupMessage(groupID, i, this.sdk)
