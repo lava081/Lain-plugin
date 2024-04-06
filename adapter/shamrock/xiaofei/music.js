@@ -2017,7 +2017,7 @@ export class xiaofei_music extends plugin {
                     reg: music_reg,
                     /** 执行方法 */
                     fnc: 'music',
-                    log: true
+                    log: false
                 }
             ]
         })
@@ -2025,7 +2025,6 @@ export class xiaofei_music extends plugin {
         try {
             let setting = Config.getdefSet('setting', 'system') || {}
             this.priority = setting.music == true ? 10 : 2000
-            this.rule[0].log = this.e.adapter == 'shamrock' ? true : false
         } catch (err) {
         }
     }

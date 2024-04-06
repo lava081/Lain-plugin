@@ -30,7 +30,7 @@ export class xiaofei_weather extends plugin {
                     reg: '^#?(小飞)?(.*)天气$',
                     /** 执行方法 */
                     fnc: 'query_weather',
-                    log: true
+                    log: false
                 }
             ]
         })
@@ -38,7 +38,6 @@ export class xiaofei_weather extends plugin {
         try {
             let setting = Config.getdefSet('setting', 'system') || {}
             this.priority = setting.weather == true ? 10 : 2000
-            this.rule[0].log = this.e.adapter == 'shamrock' ? true : false
         } catch (err) {
         }
     }
