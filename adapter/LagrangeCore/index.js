@@ -1618,10 +1618,15 @@ class LagrangeCore {
           break
         case 'image':
           try {
+            let width, height, url
             /** 笨比复读! */
             if (i?.url) i.file = i.url
             i.file = await Bot.FormatFile(i.file)
-            const { width, height, url } = await this.imageToUrl(i.file)
+            try {
+              ({ width, height, url } = await this.imageToUrl(i.file))
+            } catch (error) {
+              ({ width, height, url } = await Bot.imageToUrl(i.file))
+            }
             content += `![图片 #${width} #${height}] (${url})`
             raw_message.push(`<图片:${url}>`)
           } catch (err) {
