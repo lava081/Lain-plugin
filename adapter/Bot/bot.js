@@ -8,6 +8,7 @@ import common from '../../lib/common/common.js'
 import Cfg from '../../lib/config/config.js'
 import { fileTypeFromBuffer } from 'file-type'
 import path from 'path'
+import { core } from 'icqq'
 
 /**
 * 传入文件，返回Buffer
