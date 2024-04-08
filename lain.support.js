@@ -10,7 +10,7 @@ export default class Button {
       priority: 99,
       rule: [
         {
-          reg: '^#?(id|ID)',
+          reg: '^#?(id|ID)$',
           fnc: 'Id'
         },
         {
