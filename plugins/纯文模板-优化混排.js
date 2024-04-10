@@ -16,7 +16,7 @@ Bot.ContentToMarkdown = async function (e, content, button = []) {
 /** 处理md标记 */
 function parseMD (str) {
   /** 处理第一个标题 */
-  str = str.replace(/^#/, '\r#')
+  str = str.replace(/^#/, '\r#').replace(/\n/g, '\r')
   let msg = str.split(/(\]\(|\*\*\*|\*\*|\*|__|_|~~|~|``)/).filter(Boolean)
 
   let mdSymbols = ['](', '***', '**', '*', '__', '_', '~~', '~']
