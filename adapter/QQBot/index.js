@@ -410,6 +410,15 @@ export default class adapterQQBot {
     const message = []
     const Pieces = []
     let normalMsg = []
+    let content = ''
+    const addText = (str)=> {
+      text.push(str)
+      content += str
+    }
+    const addImage = (obj) => {
+      image.push(obj)
+      content += `![Lain-plugin #${obj.width}px #${obj.height}px](${obj.file.replace(/_/g, "%5F")})`
+    }
 
     for (let i of data) {
       switch (i.type) {
@@ -422,11 +431,11 @@ export default class adapterQQBot {
             /** 模板1、4使用按钮替换连接 */
             if (e.bot.config.markdown.type == 1 || e.bot.config.markdown.type == 4) {
               for (let p of (this.HandleURL(i.text.trim()))) {
-                p.type === 'button' ? button.push(p) : text.push(p.text)
+                p.type === 'button' ? button.push(p) : addText(p.text)
               }
             } else {
               for (let p of (await Bot.HandleURL(i.text.trim()))) {
-                p.type === 'image' ? image.push(await this.getImage(p.file, e)) : text.push(p.text)
+                p.type === 'image' ? addImage(await this.getImage(p.file, e)) : addText(p.text)
               }
             }
           }
@@ -434,26 +443,26 @@ export default class adapterQQBot {
         case 'at':
           if (e.bot.config.markdown.type) {
             if ((i.qq || i.id) === 'all') {
-              text.push('@everyone')
+              addText('@everyone')
             } else {
               let qq
 
               if (Bot.QQToOpenid) {
                 try {
                   qq = await Bot.QQToOpenid(i.qq || i.id, e)
-                  text.push(`<@${qq}>`)
+                  addText(`<@${qq}>`)
                   break
                 } catch { }
               }
 
               qq = String(i.qq || i.id).trim().split('-')
               qq = qq[1] || qq[0]
-              text.push(`<@${qq}>`)
+              addText(`<@${qq}>`)
             }
           }
           break
         case 'image':
-          image.push(await this.getImage(i?.url || i.file, e))
+          addImage(await this.getImage(i?.url || i.file, e))
           break
         case 'video':
           message.push(await this.getVideo(i?.url || i.file))
@@ -566,16 +575,21 @@ export default class adapterQQBot {
       case 4:
       case '4':
         try {
-          /** 返回数组，无需处理，直接发送即可 */
-          if (image.length && text.length) {
-            Pieces.push(...await Bot.Markdown(e, [{ type: 'text', text: text.join('\n') }, ...image], button))
+          if (Bot.ContentToMarkdown && content.trim()) {
+            Pieces.push(...await Bot.ContentToMarkdown(e, content, button))
             button.length = 0
-          } else if (image.length) {
-            Pieces.push(...await Bot.Markdown(e, image, button))
-            button.length = 0
-          } else if (text.length) {
-            Pieces.push(...await Bot.Markdown(e, [{ type: 'text', text: text.join('\n') }], button))
-            button.length = 0
+          } else if (Bot.Markdown) {
+            /** 返回数组，无需处理，直接发送即可 */
+            if (image.length && text.length) {
+              Pieces.push(...await Bot.Markdown(e, [{ type: 'text', text: text.join('\n') }, ...image], button))
+              button.length = 0
+            } else if (image.length) {
+              Pieces.push(...await Bot.Markdown(e, image, button))
+              button.length = 0
+            } else if (text.length) {
+              Pieces.push(...await Bot.Markdown(e, [{ type: 'text', text: text.join('\n') }], button))
+              button.length = 0
+            }
           }
         } catch (_err) {
           console.error(_err)
