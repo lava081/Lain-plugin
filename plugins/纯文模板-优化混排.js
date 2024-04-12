@@ -7,6 +7,8 @@
 import plugin from '../Lain-plugin/adapter/QQBot/plugins.js'
 
 Bot.ContentToMarkdown = async function (e, content, button = []) {
+  /** 数组转字符串 */
+  content = content.join('\n')
   /** 处理二笔语法，分割为数组 */
   content = parseMD(content)
 
