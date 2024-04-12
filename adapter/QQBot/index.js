@@ -410,14 +410,14 @@ export default class adapterQQBot {
     const message = []
     const Pieces = []
     let normalMsg = []
-    let content = ''
+    const content = []
     const addText = (str)=> {
       text.push(str)
-      content += str
+      content.push(str)
     }
     const addImage = (obj) => {
       image.push(obj)
-      content += `![Lain-plugin #${obj.width}px #${obj.height}px](${obj.file.replace(/_/g, "%5F")})`
+      content.push(`![Lain-plugin #${obj.width}px #${obj.height}px](${obj.file.replace(/_/g, "%5F")})`)
     }
 
     for (let i of data) {
@@ -575,7 +575,7 @@ export default class adapterQQBot {
       case 4:
       case '4':
         try {
-          if (Bot.ContentToMarkdown && content.trim()) {
+          if (Bot.ContentToMarkdown && content.length) {
             Pieces.push(...await Bot.ContentToMarkdown(e, content, button))
             button.length = 0
           } else if (Bot.Markdown) {
