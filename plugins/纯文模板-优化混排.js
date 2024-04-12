@@ -6,9 +6,12 @@
 
 import plugin from '../Lain-plugin/adapter/QQBot/plugins.js'
 
+/** 违规关键字 */
+let mdSymbols = ['](', '***', '**', '*', '__', '_', '~~', '~', '``', '`']
+
 Bot.ContentToMarkdown = async function (e, content, button = []) {
   /** 数组转字符串 */
-  content = content.join('\n')
+  content = content.join('\r')
   /** 处理二笔语法，分割为数组 */
   content = parseMD(content)
 
@@ -19,9 +22,7 @@ Bot.ContentToMarkdown = async function (e, content, button = []) {
 function parseMD (str) {
   /** 处理第一个标题 */
   str = str.replace(/^#/, '\r#').replace(/\n/g, '\r')
-  let msg = str.split(/(\]\(|\*\*\*|\*\*|\*|__|_|~~|~|``)/).filter(Boolean)
-
-  let mdSymbols = ['](', '***', '**', '*', '__', '_', '~~', '~']
+  let msg = str.split(/(\]\(|\*\*\*|\*\*|\*|__|_|~~|~|``|`)/).filter(Boolean)
   let result = []
   let temp = ''
 
@@ -46,12 +47,16 @@ function sort (arr) {
   const Array = []
   for (let i = 0; i < arr.length; i += 9) {
     if (Array.length) {
-      // 处理第十张图
-      if (arr[i - 1].match(/!\[/)) {
+      // 处理第九张图
+      if (!mdSymbols.includes(arr[i])) {
+        Array[Array.length - 1][9] = arr[i]
+        i++
+      } else if (arr[i - 1].match(/!\[/)) {
         Array[Array.length - 1][9] = arr[i].substring(0, arr[i].indexOf(')') + 1)
         arr[i] = arr[i].substring(arr[i].indexOf(')') + 1)
       }
     }
+    if (!arr.slice(i, i + 9).length) break
     Array.push(arr.slice(i, i + 9))
   }
   return Array
