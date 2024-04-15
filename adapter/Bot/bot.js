@@ -547,21 +547,21 @@ Bot.getPttUrl = async function (fid) {
 /**
  * 上传多媒体文件
  * @param id 机器人id
- * @param target_id 接受者id
+ * @param target_openid 接受者id
  * @param target_type  接受者类型：user|group
  * @param file_data 文件数据：可以是本地文件(file://)或网络地址(http://)或base64或Buffer
  * @param file_type 数据类型：1 image;2 video; 3 audio
  */
-Bot.uploadMedia = async function (id, target_id, target_type, file_data, file_type, decode = false) {
+Bot.uploadMedia = async function (id, target_openid, target_type, file_data, file_type, decode = false) {
   if (typeof file_type === 'string') file_type = ['image', 'video', 'audio'].indexOf(file_type) + 1
-  target_id = target_id.split('-')
-  target_id = target_id[1] || target_id[0]
-  const result = await Bot[id].sdk.uploadMedia(target_id, target_type, file_data, file_type, decode)
-  const file_info = await Bot.ICQQproto(result.file_info)
-  const file_uuid = await Bot.ICQQproto(result.file_uuid)
+  target_openid = target_openid.split('-')
+  target_openid = target_openid[1] || target_openid[0]
+  const result = await Bot[id].sdk.uploadMedia(target_openid, target_type, file_data, file_type, decode)
+  const file_info = Bot.ICQQproto(result.file_info)
+  const file_uuid = Bot.ICQQproto(result.file_uuid)
   let ret = {
     fileid: result.file_uuid,
-    base64: file_uuid[2].encoded.toString('hex').toUpperCase(),
+    md5: file_uuid[2].encoded.toString('hex').toUpperCase(),
     size: file_uuid[3],
     appid: file_uuid[4],
     time: file_uuid[5],
@@ -573,10 +573,10 @@ Bot.uploadMedia = async function (id, target_id, target_type, file_data, file_ty
   switch (file_type) {
     case 1:ret = {
       ...ret,
-      url: `http://${file_info[1][2][1][2][3].encoded.toString().replace('.com.cn','.com')}${file_info[1][3][34][30].encoded.toString().replace(/_/g, "%5F")}`,
+      url: `http://${file_info[1][2][1][2][3].encoded.toString().replace('.com.cn','.com')}${file_info[1][3][(target_type === 'group') ? 34 : 29][30].encoded.toString().replace(/_/g, "%5F")}`,
       width: file_info[1][2][1][1][1][6],
       height: file_info[1][2][1][1][1][7],
-      target_id: file_info[1][2][1][6][202][1]
+      target_id: file_info[1][2][1][6][(target_type === 'group') ? 202 : 201][(target_type === 'group') ? 1 : 2]
     } 
     break
     case 2: ret = {
