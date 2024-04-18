@@ -93,7 +93,7 @@ class LagrangeCore {
       }
     })().catch(common.error)
     switch (data.notice_type) {
-      case "group_recall":
+      case 'group_recall':
         data.sub_type = 'recall'
         data.notice_type = 'group'
         try {
@@ -235,7 +235,7 @@ class LagrangeCore {
         // if (time - pokeCD < 1500) return false
         // pokeCD = time
         break
-      case 'friend_add':{
+      case 'friend_add': {
         common.info(this.id, `好友请求[${data.user_id}]`)
         break
       }
@@ -1210,10 +1210,12 @@ class LagrangeCore {
       ({ content, message } = await Bot.processContent(content, message, e))
     }
 
-    if (content) content = await this.sendMarkdown(content, msg, e)
+    if (content) {
+      message = await this.sendMarkdown(content, msg, e)
+    }
 
-    if (group_id) return await api.send_group_msg(this.id, group_id, message, raw_message, node, content)
-    return await api.send_private_msg(this.id, user_id, message, raw_message, node, content)
+    if (group_id) return await api.send_group_msg(this.id, group_id, message, raw_message, node)
+    return await api.send_private_msg(this.id, user_id, message, raw_message, node)
   }
 
   /**
@@ -1229,8 +1231,10 @@ class LagrangeCore {
       ({ content, message } = await Bot.processContent(content, message, { self_id: this.id }))
     }
 
-    if (content) content = await this.sendMarkdown(content, msg)
-    return await api.send_private_msg(this.id, user_id, message, raw_message, node, content)
+    if (content) {
+      message = await this.sendMarkdown(content, msg)
+    }
+    return await api.send_private_msg(this.id, user_id, message, raw_message, node)
   }
 
   /**
@@ -1246,29 +1250,21 @@ class LagrangeCore {
       ({ content, message } = await Bot.processContent(content, message, { self_id: this.id, group_id }))
     }
 
-    if (content) content = await this.sendMarkdown(content, msg)
-    return await api.send_group_msg(this.id, group_id, message, raw_message, node, content)
+    if (content) {
+      message = await this.sendMarkdown(content, msg)
+    }
+    return await api.send_group_msg(this.id, group_id, message, raw_message, node)
   }
 
   /** 发送Markdown */
   async sendMarkdown (content, msg, e) {
-    /** 随机生成1-10000 */
-    const group_id = Math.floor(Math.random() * 10000) + 10000
-    let messages =
-    {
-      type: 'node',
-      data: {
-        name: '小助手',
-        uin: '2854196310',
-        content: [
-          {
-            type: 'markdown',
-            // 迷惑？？
-            data: { content: JSON.stringify({ content }) }
-          }
-        ]
+    const message = [
+      {
+        type: 'markdown',
+        // 迷惑？？
+        data: { content: JSON.stringify({ content }) }
       }
-    }
+    ]
 
     let buttonData = {
       rows: []
@@ -1282,7 +1278,7 @@ class LagrangeCore {
       }
     })
     if (buttonData.rows.length > 0) {
-      messages.data.content.push({ type: 'keyboard', data: { content: buttonData } })
+      message.push({ type: 'keyboard', data: { content: buttonData } })
     }
 
     /** 构建一个普通e给按钮用 */
@@ -1295,13 +1291,11 @@ class LagrangeCore {
     if (Button) {
       const button = await this.button(e)
       if (button && button?.length) {
-        messages.data.content.push(...button)
+        message.push(...button)
       }
     }
-    messages = [messages]
-    // 和文档说的不一样啊
-    const resid = await api.send_forward_msg(this.id, group_id, messages)
-    return resid
+
+    return message
   }
 
   /** 按钮添加 */
@@ -1387,7 +1381,7 @@ class LagrangeCore {
             /** 转换buffer,但愿吧 */
             if (!/^http(s)?:\/\/|^file:\/\//.test(file)) {
               file = 'base64://' + await Bot.Base64(file)
-              raw_message.push(`<语音:base64://...>`)
+              raw_message.push('<语音:base64://...>')
             } else {
               raw_message.push(`<语音:${file}>`)
             }
@@ -1408,7 +1402,7 @@ class LagrangeCore {
             /** 转换buffer,但愿吧 */
             if (!/^http(s)?:\/\/|^file:\/\//.test(file)) {
               file = 'base64://' + await Bot.Base64(file)
-              raw_message.push(`<视频:base64://...>`)
+              raw_message.push('<视频:base64://...>')
             } else {
               raw_message.push(`<视频:${file}>`)
             }
@@ -1584,7 +1578,7 @@ class LagrangeCore {
             /** 转换buffer,但愿吧 */
             if (!/^http(s)?:\/\/|^file:\/\//.test(file)) {
               file = 'base64://' + await Bot.Base64(file)
-              raw_message.push(`<语音:base64://...>`)
+              raw_message.push('<语音:base64://...>')
             } else {
               raw_message.push(`<语音:${file}>`)
             }
@@ -1605,7 +1599,7 @@ class LagrangeCore {
             /** 转换buffer,但愿吧 */
             if (!/^http(s)?:\/\/|^file:\/\//.test(file)) {
               file = 'base64://' + await Bot.Base64(file)
-              raw_message.push(`<视频:base64://...>`)
+              raw_message.push('<视频:base64://...>')
             } else {
               raw_message.push(`<视频:${file}>`)
             }
@@ -1708,9 +1702,9 @@ class LagrangeCore {
       file = 'base64://' + await Bot.Base64(file)
     }
     const url = (await api.upload_image(this.id, file))
-    .replace(/^https:\/\//, 'http://')
-    .replace(/.com.cn/, '.com')
-    if (!width){
+      .replace(/^https:\/\//, 'http://')
+      .replace(/.com.cn/, '.com')
+    if (!width) {
       ({ width, height } = sizeOf(await Bot.Buffer(url)))
     }
     return { url, width, height }
