@@ -1702,6 +1702,8 @@ class LagrangeCore {
       file = 'base64://' + await Bot.Base64(file)
     }
     const url = (await api.upload_image(this.id, file))
+      .replace(/^https:\/\//, 'http://')
+      .replace(/.com.cn/, '.com')
     if (!width) {
       ({ width, height } = sizeOf(await Bot.Buffer(url)))
     }
