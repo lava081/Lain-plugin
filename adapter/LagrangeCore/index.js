@@ -1621,7 +1621,7 @@ class LagrangeCore {
             } catch (error) {
               ({ width, height, url } = await Bot.imageToUrl(i.file))
             }
-            content += `![图片 #${width} #${height}] (${url})`
+            content += `![图片 #${width}px #${height}px] (${url})`
             raw_message.push(`<图片:${url}>`)
           } catch (err) {
             message.push({ type: 'text', data: { text: err.message } })
@@ -1702,8 +1702,6 @@ class LagrangeCore {
       file = 'base64://' + await Bot.Base64(file)
     }
     const url = (await api.upload_image(this.id, file))
-      .replace(/^https:\/\//, 'http://')
-      .replace(/.com.cn/, '.com')
     if (!width) {
       ({ width, height } = sizeOf(await Bot.Buffer(url)))
     }

@@ -1552,7 +1552,7 @@ class Shamrock {
             if (i?.url) i.file = i.url
             i.file = await Bot.FormatFile(i.file)
             const { width, height, url } = await Bot.imageToUrl(i.file)
-            content += `![图片 #${width} #${height}] (${url})`
+            content += `![图片 #${width}px #${height}px] (${url})`
             raw_message.push(`<图片:${url}>`)
           } catch (err) {
             message.push({ type: 'text', data: { text: err.message } })
