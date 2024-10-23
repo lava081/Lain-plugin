@@ -27,7 +27,7 @@
     "file-type": "^19.0.0",
     "get-urls": "^12.1.0",
     "qq-group-bot": "1.0.42",
-    "qrcode": "^1.5.3",
+    "qrcode": "^1.5.4",
     "sharp": "^0.33.3",
     "silk-wasm": "^3.3.4",
     "wechat4u": "^0.7.14",
