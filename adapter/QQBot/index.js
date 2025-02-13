@@ -508,7 +508,7 @@ export default class adapterQQBot {
       case 0:
       case '0':
         if (text.length) message.push({ type: 'text', text: text.join('') })
-        if (image.length) message.push(image.shift())
+        // if (image.length) message.push(image.shift())
         if (image.length) Pieces.push(...image)
         break
       /** 全局，不发送原消息 */
@@ -617,6 +617,8 @@ export default class adapterQQBot {
           groupId = await Bot.QQToOpenid(groupId, e, 'group')
         } catch { }
       }
+      if (e.bot.config.markdown.type == 0 || e.bot.config.markdown.type == 3)
+        return { type: 'image', file: await Bot.FormatFile(file) }
       const { url, width, height } = await Bot.uploadMedia(this.id, groupId, 'group', file, type)
       return { type, file: url, width, height }
     } catch (error) {

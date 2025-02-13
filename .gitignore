@@ -12,3 +12,5 @@ plugins/button
 /.idea
 /src
 adapter/Bot/icqqs.js
+resources/avatar.jpg
+resources/tmp/

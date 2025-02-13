@@ -1,4 +1,4 @@
-import { Bot as QQBot } from 'qq-group-bot'
+import { Bot as QQBot } from 'qq-official-bot'
 import Cfg from '../../../../lib/config/config.js'
 
 export default class QQSDK {
@@ -45,6 +45,8 @@ export default class QQSDK {
       /** 公域 私域事件 */
       this.sandbox ? this.config.intents.push('GUILD_MESSAGES') : this.config.intents.push('PUBLIC_GUILD_MESSAGES')
     }
+
+    this.config.mode='websocket'
 
     /** 创建机器人 */
     this.sdk = new QQBot(this.config)
